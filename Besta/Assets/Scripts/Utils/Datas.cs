@@ -4,12 +4,14 @@ public class Datas
 {
     public class Note
     {
-        public double _startTiming;
-        public double _endTiming;
+        public int _laneNumber;
+        public int _startTiming;
+        public int _endTiming;
         public bool _isLongNote;
 
-        public Note(double startTiming, double endTiming, bool isLongNote)
+        public Note(int laneNumber, int startTiming, int endTiming, bool isLongNote)
         {
+            _laneNumber = laneNumber;
             _startTiming = startTiming;
             _endTiming = endTiming;
             _isLongNote = isLongNote;
