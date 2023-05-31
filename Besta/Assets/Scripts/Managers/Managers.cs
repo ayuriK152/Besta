@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Manager : MonoBehaviour
+public class Managers : MonoBehaviour
 {
-    static Manager _managerInstance;
-    static Manager ManagerInstance { get { Init(); return _managerInstance; } }
+    static Managers _managerInstance;
+    static Managers ManagerInstance { get { Init(); return _managerInstance; } }
 
     private static InputManager _input = new InputManager();
     public static InputManager Input { get { return _input; } set { _input = value; } }
@@ -27,11 +27,11 @@ public class Manager : MonoBehaviour
             if (go == null)
             {
                 go = new GameObject { name = "@Manager" };
-                go.AddComponent<Manager>();
+                go.AddComponent<Managers>();
             }
 
             DontDestroyOnLoad(go);
-            _managerInstance = go.GetComponent<Manager>();
+            _managerInstance = go.GetComponent<Managers>();
         }
     }
 }

@@ -22,12 +22,14 @@ public class Datas
     {
         public AudioSource _musicSource;
         public int _bpm;
-        public double _songOffset = 0.0f;
+        public int _songOffset;
+        public int _songLength;
 
         public MusicPattern()
         {
             _bpm = 120;
-            _songOffset = 0.0f;
+            _songOffset = 0;
+            // _songLength = _songOffset + _musicSource.clip.samples;
         }
     }
 }

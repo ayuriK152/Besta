@@ -1,18 +1,22 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using static Define;
 
 public class InputManager
 {
     public Action<MouseEvent, MousePointer> MouseAction = null;
+    public Action KeyAction = null;
 
     bool _pressed = false;
     float _pressedTime = 0f;
 
     public void OnUpdate()
     {
+        if (Input.anyKeyDown && KeyAction != null)
+        {
+            KeyAction.Invoke();
+        }
+
         if (MouseAction != null)
         {
             if (Input.GetMouseButtonDown(0))
