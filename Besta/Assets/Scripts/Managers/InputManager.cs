@@ -19,7 +19,7 @@ public class InputManager
 
         if (MouseAction != null)
         {
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButton(0))
             {
                 if (!_pressed)
                 {

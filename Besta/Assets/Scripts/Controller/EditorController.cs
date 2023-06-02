@@ -38,15 +38,27 @@ public class EditorController : MonoBehaviour
 
     void EditorMouseEvent(MouseEvent mouseEvent, MousePointer mousePointer)
     {
-        if (mouseEvent == MouseEvent.Click && mousePointer == MousePointer.Left)
+        if (mouseEvent == MouseEvent.PointerDown && mousePointer == MousePointer.Left)
         {
-            Debug.Log("AMOGUS");
             Ray2D ray = new Ray2D(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
             RaycastHit2D hit = Physics2D.Raycast (ray.origin, ray.direction);
 
             if (hit.collider.tag == "EditorCollider")
             {
-                Instantiate(_editorNote, hit.collider.transform.position, hit.collider.transform.rotation, _noteInstantiatePoint.transform);
+                Instantiate(_editorNote, hit.collider.transform.position, hit.collider.transform.rotation, _noteInstantiatePoint.transform).name = _editorNote.name;
+                Debug.Log("Note Instantiated");
+            }
+        }
+
+        if (mouseEvent == MouseEvent.PointerDown && mousePointer == MousePointer.Right)
+        {
+            Ray2D ray = new Ray2D(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
+
+            if (hit.collider.tag == "EditorNote")
+            {
+                Destroy(hit.collider.gameObject);
+                Debug.Log("Note Deleted");
             }
         }
     }
