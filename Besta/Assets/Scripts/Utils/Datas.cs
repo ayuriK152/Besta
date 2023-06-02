@@ -20,7 +20,7 @@ public class Datas
 
     public class MusicPattern
     {
-        public AudioSource _musicSource;
+        public AudioClip _musicSource;
         public int _bpm;
         public int _songOffset;
         public int _songLength;
@@ -29,7 +29,8 @@ public class Datas
         {
             _bpm = 120;
             _songOffset = 0;
-            // _songLength = _songOffset + _musicSource.clip.samples;
+            _musicSource = Resources.Load("Sounds/Grievous_Lady") as AudioClip;    // 테스트용 임시 노래파일, 선택 가능하도록 변경 요망
+            _songLength = _songOffset + _musicSource.samples;
         }
     }
 }

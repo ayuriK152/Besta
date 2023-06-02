@@ -1,5 +1,4 @@
 using System;
-using UnityEditor;
 using UnityEngine;
 using static Datas;
 using static Define;
@@ -10,8 +9,11 @@ public class EditorController : MonoBehaviour
     static EditorController EditorInstance { get { return _editorInstance; } }
 
     public Action<int, int, int, bool> NoteCreateAction;
-    public Action<Beat> BeatChangeAction;
-    public EditorNoteMode editorNoteMode;
+    public static Action<Beat> BeatChangeAction;
+
+    public static EditorNoteMode editorNoteMode;
+    public static Beat editorBeat;
+
     MusicPattern _musicPattern;
     double _noteTimingValue;
 
@@ -21,6 +23,7 @@ public class EditorController : MonoBehaviour
     void Start()
     {
         editorNoteMode = EditorNoteMode.NormalNote;
+        editorBeat = Beat.Four;
         _musicPattern = new MusicPattern();
         _noteTimingValue = 48000 / (_musicPattern._bpm / (double)60);
         NoteCreateAction = null;
@@ -42,6 +45,8 @@ public class EditorController : MonoBehaviour
         {
             Ray2D ray = new Ray2D(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
             RaycastHit2D hit = Physics2D.Raycast (ray.origin, ray.direction);
+            if (hit.collider == null)
+                return;
 
             if (hit.collider.tag == "EditorCollider")
             {
@@ -54,6 +59,8 @@ public class EditorController : MonoBehaviour
         {
             Ray2D ray = new Ray2D(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
             RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
+            if (hit.collider == null)
+                return;
 
             if (hit.collider.tag == "EditorNote")
             {

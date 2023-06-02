@@ -5,13 +5,12 @@ public class EditorBar : MonoBehaviour
 {
     public static int barCount = 0;
     public int barIndex;
-    EditorController _editorController;
     GameObject[] _linesByBeat;
 
     void Start()
     {
-        _editorController.BeatChangeAction -= OnBeatChanged;
-        _editorController.BeatChangeAction += OnBeatChanged;
+        EditorController.BeatChangeAction -= OnBeatChanged;
+        EditorController.BeatChangeAction += OnBeatChanged;
         _linesByBeat = new GameObject[4];
         _linesByBeat[0] = transform.Find("1over2").gameObject;
         _linesByBeat[1] = transform.Find("1over4").gameObject;
