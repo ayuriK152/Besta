@@ -30,7 +30,7 @@ public class InputManager
                 _pressed = true;
             }
 
-            else if (Input.GetMouseButtonUp(0))
+            if (Input.GetMouseButtonUp(0))
             {
                 if (_pressed)
                 {
