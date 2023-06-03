@@ -10,12 +10,12 @@ public class EditorUI : MonoBehaviour
     {
         beatChangeDropdown = GameObject.Find("BeatSelector").transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
         beatChangeDropdown.value = 3;
-        EditorController.BeatChangeAction.Invoke(EditorController.editorBeat);
     }
 
     public void OnBeatChange()
     {
         EditorController.editorBeat = (Beat)beatChangeDropdown.value;
-        EditorController.BeatChangeAction.Invoke(EditorController.editorBeat);
+        if (EditorController.BeatChangeAction != null)
+            EditorController.BeatChangeAction.Invoke(EditorController.editorBeat);
     }
 }

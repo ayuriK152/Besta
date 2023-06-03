@@ -16,22 +16,38 @@ public class EditorController : MonoBehaviour
 
     MusicPattern _musicPattern;
     double _noteTimingValue;
+    int barAmount;
 
     GameObject _noteInstantiatePoint;
+    GameObject _barInstatiatePoint;
     GameObject _editorNote;
+    GameObject _editorBar;
 
     void Start()
     {
         editorNoteMode = EditorNoteMode.NormalNote;
-        editorBeat = Beat.Four;
+        editorBeat = Beat.Eight;
         _musicPattern = new MusicPattern();
-        _noteTimingValue = 48000 / (_musicPattern._bpm / (double)60);
+        _noteTimingValue = (_musicPattern._musicSource.frequency / 4) / (_musicPattern._bpm / (double)60);
+        barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
         NoteCreateAction = null;
         _noteInstantiatePoint = GameObject.Find("Notes");
+        _barInstatiatePoint = GameObject.Find("Grid");
         _editorNote = Resources.Load<GameObject>("Prefabs/EditorNote");
+        _editorBar = Resources.Load<GameObject>("Prefabs/EditorBar");
+        Init();
 
         Managers.Input.MouseAction -= EditorMouseEvent;
         Managers.Input.MouseAction += EditorMouseEvent;
+    }
+
+    void Init()
+    {
+        for (int i = 0; i < barAmount; i++)
+        {
+            Instantiate(_editorBar, _barInstatiatePoint.transform);
+            _editorBar.transform.localPosition = new Vector3(0, i * 4.8f, 0);
+        }
     }
 
     void Update()
