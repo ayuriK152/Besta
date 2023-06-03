@@ -49,7 +49,7 @@ public class EditorController : MonoBehaviour
         {
             _instantiatedEditorBars.Add(Instantiate(_editorBar, _barInstatiatePoint.transform));
             _instantiatedEditorBars[i].transform.localPosition = new Vector3(0, i * 4.8f, 0);
-            _instantiatedEditorBars[i].name = _editorBar.name + " 1";
+            _instantiatedEditorBars[i].name = _editorBar.name + " " + (i + 1);
         }
     }
 
@@ -94,7 +94,7 @@ public class EditorController : MonoBehaviour
             }
         }
 
-        if (mouseEvent == MouseEvent.PointerUp && mousePointer == MousePointer.Left)
+        if (mouseEvent == MouseEvent.PointerUp && mousePointer == MousePointer.Left)    // 왼쪽 마우스 때는 순간
         {
             if (initialNote != null)
             {
