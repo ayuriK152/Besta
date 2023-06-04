@@ -1,15 +1,17 @@
+using System.Collections.Generic;
 using UnityEngine;
+using static Define;
 
 public class Datas
 {
     public class Note
     {
-        public int _laneNumber;
+        public LaneNumber _laneNumber;
         public int _startTiming;
         public int _endTiming;
         public bool _isLongNote;
 
-        public Note(int laneNumber, int startTiming, int endTiming, bool isLongNote)
+        public Note(LaneNumber laneNumber, int startTiming, int endTiming, bool isLongNote)
         {
             _laneNumber = laneNumber;
             _startTiming = startTiming;
@@ -24,6 +26,7 @@ public class Datas
         public int _bpm;
         public int _songOffset;
         public int _songLength;
+        public List<Note> _noteDatas;
 
         public MusicPattern()
         {
@@ -31,6 +34,7 @@ public class Datas
             _songOffset = 0;
             _musicSource = Resources.Load("Sounds/Grievous_Lady") as AudioClip;    // 테스트용 임시 노래파일, 선택 가능하도록 변경 요망
             _songLength = _songOffset + _musicSource.samples;
+            _noteDatas = new List<Note>();
         }
     }
 }

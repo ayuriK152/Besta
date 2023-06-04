@@ -1,5 +1,14 @@
 public class Define
 {
+    public enum LaneNumber
+    {
+        None,
+        First,
+        Second,
+        Third,
+        Fourth
+    }
+
     public enum EditorNoteMode
     {
         NormalNote,

@@ -15,7 +15,8 @@ public class EditorController : MonoBehaviour
     public static EditorNoteMode editorNoteMode;
     public static Beat editorBeat;
 
-    MusicPattern _musicPattern;
+    [SerializeField]
+    public MusicPattern _musicPattern;
     double _noteTimingValue;
     int barAmount;
 
@@ -27,12 +28,13 @@ public class EditorController : MonoBehaviour
 
     void Start()
     {
-        editorNoteMode = EditorNoteMode.LongNote;
+        editorNoteMode = EditorNoteMode.NormalNote;
         editorBeat = Beat.Eight;
         _musicPattern = new MusicPattern();
         _noteTimingValue = (_musicPattern._musicSource.frequency / 4) / (_musicPattern._bpm / (double)60);
         barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
         NoteCreateAction = null;
+        BeatChangeAction = null;
         _noteInstantiatePoint = GameObject.Find("Notes");
         _barInstatiatePoint = GameObject.Find("Grid");
         _editorNote = Resources.Load<GameObject>("Prefabs/EditorNote");
@@ -50,6 +52,7 @@ public class EditorController : MonoBehaviour
             _instantiatedEditorBars.Add(Instantiate(_editorBar, _barInstatiatePoint.transform));
             _instantiatedEditorBars[i].transform.localPosition = new Vector3(0, i * 4.8f, 0);
             _instantiatedEditorBars[i].name = _editorBar.name + " " + (i + 1);
+            _instantiatedEditorBars[i].GetComponent<EditorBar>().barIndex = i;
         }
     }
 
@@ -72,12 +75,36 @@ public class EditorController : MonoBehaviour
             if (hit.collider.tag == "EditorCollider")
             {
                 initialNote = Instantiate(_editorNote, new Vector3(hit.collider.transform.position.x, hit.collider.transform.position.y, -2), hit.collider.transform.rotation, _noteInstantiatePoint.transform);
-                initialNote.name =  _editorNote.name;
+                LaneNumber tempNoteLaneNum = LaneNumber.None;
+                switch(hit.collider.name)
+                {
+                    case "First":
+                        tempNoteLaneNum = LaneNumber.First;
+                        break;
+                    case "Second":
+                        tempNoteLaneNum = LaneNumber.Second;
+                        break;
+                    case "Third":
+                        tempNoteLaneNum = LaneNumber.Third;
+                        break;
+                    case "Fourth":
+                        tempNoteLaneNum = LaneNumber.Fourth;
+                        break;
+                }
+                int currentBarIndex;
+                if (hit.collider.transform.parent.name != "Base")
+                    currentBarIndex = hit.collider.transform.parent.parent.parent.GetComponent<EditorBar>().barIndex;
+                else
+                    currentBarIndex = hit.collider.transform.parent.parent.GetComponent<EditorBar>().barIndex;
+
+                Note tempNoteData = new Note(tempNoteLaneNum, (int)(((currentBarIndex * 16)+ (hit.collider.transform.parent.transform.localPosition.y / 0.3f)) * _noteTimingValue) , 0, false);
                 if (editorNoteMode == EditorNoteMode.LongNote)
                 {
+                    tempNoteData._isLongNote = true;
                     initialNote.GetComponent<EditorNote>().longNotePole.SetActive(true);
                     initialNote.GetComponent<EditorNote>().endPoint.SetActive(true);
                 }
+                _musicPattern._noteDatas.Add(tempNoteData);
                 Debug.Log("Note Instantiated");
             }
         }
@@ -88,9 +115,14 @@ public class EditorController : MonoBehaviour
                 return;
             if (hit.collider.tag == "EditorCollider" && editorNoteMode == EditorNoteMode.LongNote && initialNote != null)
             {
+                int currentBarIndex;
+                if (hit.collider.transform.parent.name != "Base")
+                    currentBarIndex = hit.collider.transform.parent.parent.parent.GetComponent<EditorBar>().barIndex;
+                else
+                    currentBarIndex = hit.collider.transform.parent.parent.GetComponent<EditorBar>().barIndex;
+                _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming = (int)(((currentBarIndex * 16) + (hit.collider.transform.parent.transform.localPosition.y / 0.3f)) * _noteTimingValue);
                 initialNote.GetComponent<EditorNote>().endPoint.transform.localPosition = new Vector2(0, hit.collider.transform.position.y - initialNote.transform.position.y);
                 initialNote.GetComponent<EditorNote>().ResizePole();
-                Debug.Log("amogus");
             }
         }
 
@@ -98,7 +130,17 @@ public class EditorController : MonoBehaviour
         {
             if (initialNote != null)
             {
-                initialNote.GetComponent<EditorNote>().longNotePole.GetComponent<BoxCollider2D>().enabled = true;
+                if (editorNoteMode == EditorNoteMode.LongNote)
+                {
+                    if (_musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._startTiming == _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming)
+                    {
+                        _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming = 0;
+                        _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._isLongNote = false;
+                    }
+                    else
+                        initialNote.GetComponent<EditorNote>().longNotePole.GetComponent<BoxCollider2D>().enabled = true;
+                }
+                Debug.Log(_musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._laneNumber.ToString() + " " + _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._startTiming + " " + _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming);
                 initialNote = null;
             }
         }
