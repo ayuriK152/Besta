@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 using static Datas;
 using static Define;
@@ -56,7 +57,97 @@ public class EditorController : MonoBehaviour
         }
     }
 
-    GameObject initialNote;
+    void NoteInstantiateOnMouseButtonDown(Ray2D ray, RaycastHit2D hit)      // 왼쪽 마우스 버튼 down시 노트 입력 시작
+    {
+        if (hit.collider == null)
+            return;
+
+        if (hit.collider.tag == "EditorNote")       // 이미 노트가 있는 부분에 중복 입력을 시도한 경우, 해당 노트 삭제후 입력 시작
+        {
+            Destroy(hit.collider.transform.parent.gameObject);
+            Debug.Log("Note Deleted");
+            hit = Physics2D.Raycast(ray.origin, ray.direction);
+        }
+
+        if (hit.collider.tag == "EditorCollider")
+        {
+            Transform editorCollider = hit.collider.transform;
+            Transform editorColliderParent = editorCollider.parent;
+            currentNote = Instantiate(_editorNote, new Vector3(editorCollider.position.x, editorCollider.position.y, -2), editorCollider.rotation, _noteInstantiatePoint.transform);
+            LaneNumber tempNoteLaneNum = LaneNumber.None;
+            switch (hit.collider.name)
+            {
+                case "First":
+                    tempNoteLaneNum = LaneNumber.First;
+                    break;
+                case "Second":
+                    tempNoteLaneNum = LaneNumber.Second;
+                    break;
+                case "Third":
+                    tempNoteLaneNum = LaneNumber.Third;
+                    break;
+                case "Fourth":
+                    tempNoteLaneNum = LaneNumber.Fourth;
+                    break;
+            }
+
+            int currentBarIndex;
+            if (editorColliderParent.name != "Base")
+                currentBarIndex = editorColliderParent.parent.parent.GetComponent<EditorBar>().barIndex;
+            else
+                currentBarIndex = editorColliderParent.parent.GetComponent<EditorBar>().barIndex;
+
+            Note tempNoteData = new Note(tempNoteLaneNum, (int)(((currentBarIndex * 16) + (editorColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue), 0, false);
+            if (editorNoteMode == EditorNoteMode.LongNote)
+            {
+                tempNoteData._isLongNote = true;
+                currentNote.GetComponent<EditorNote>().longNotePole.SetActive(true);
+                currentNote.GetComponent<EditorNote>().endPoint.SetActive(true);
+            }
+            _musicPattern._noteDatas.Add(tempNoteData);
+            Debug.Log("Note Instantiated");
+        }
+    }
+    void NoteInstantiateOnMouseButtonPress(RaycastHit2D hit)                // 왼쪽 마우스 번튼 press, 롱노트 모드인 경우
+    {
+        if (hit.collider == null)
+            return;
+        if (hit.collider.tag == "EditorCollider" && editorNoteMode == EditorNoteMode.LongNote && currentNote != null)
+        {
+            Transform editorCollider = hit.collider.transform;
+            Transform editroColliderParent = editorCollider.parent;
+
+            int currentBarIndex;
+            if (editroColliderParent.name != "Base")
+                currentBarIndex = editroColliderParent.parent.parent.GetComponent<EditorBar>().barIndex;
+            else
+                currentBarIndex = editroColliderParent.parent.GetComponent<EditorBar>().barIndex;
+
+            _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming = (int)(((currentBarIndex * 16) + (editroColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue);
+            currentNote.GetComponent<EditorNote>().endPoint.transform.localPosition = new Vector2(0, editorCollider.position.y - currentNote.transform.position.y);
+            currentNote.GetComponent<EditorNote>().ResizePole();
+        }
+    }
+    void NoteInstantiateOnMouseButtonUp()
+    {
+        if (currentNote != null)
+        {
+            if (editorNoteMode == EditorNoteMode.LongNote)
+            {
+                if (_musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._startTiming == _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming)
+                {
+                    _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming = 0;
+                    _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._isLongNote = false;
+                }
+                else
+                    currentNote.GetComponent<EditorNote>().longNotePole.GetComponent<BoxCollider2D>().enabled = true;
+            }
+            Debug.Log(_musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._laneNumber.ToString() + " " + _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._startTiming + " " + _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming);
+            currentNote = null;
+        }
+    }
+
+    GameObject currentNote;
     void EditorMouseEvent(MouseEvent mouseEvent, MousePointer mousePointer)
     {
         Ray2D ray = new Ray2D(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
@@ -64,85 +155,17 @@ public class EditorController : MonoBehaviour
 
         if (mouseEvent == MouseEvent.PointerDown && mousePointer == MousePointer.Left)      // 왼쪽 마우스 클릭
         {
-            if (hit.collider == null)
-                return;
-            if (hit.collider.tag == "EditorNote")
-            {
-                Destroy(hit.collider.transform.parent.gameObject);
-                Debug.Log("Note Deleted");
-                hit = Physics2D.Raycast(ray.origin, ray.direction);
-            }
-            if (hit.collider.tag == "EditorCollider")
-            {
-                initialNote = Instantiate(_editorNote, new Vector3(hit.collider.transform.position.x, hit.collider.transform.position.y, -2), hit.collider.transform.rotation, _noteInstantiatePoint.transform);
-                LaneNumber tempNoteLaneNum = LaneNumber.None;
-                switch(hit.collider.name)
-                {
-                    case "First":
-                        tempNoteLaneNum = LaneNumber.First;
-                        break;
-                    case "Second":
-                        tempNoteLaneNum = LaneNumber.Second;
-                        break;
-                    case "Third":
-                        tempNoteLaneNum = LaneNumber.Third;
-                        break;
-                    case "Fourth":
-                        tempNoteLaneNum = LaneNumber.Fourth;
-                        break;
-                }
-                int currentBarIndex;
-                if (hit.collider.transform.parent.name != "Base")
-                    currentBarIndex = hit.collider.transform.parent.parent.parent.GetComponent<EditorBar>().barIndex;
-                else
-                    currentBarIndex = hit.collider.transform.parent.parent.GetComponent<EditorBar>().barIndex;
-
-                Note tempNoteData = new Note(tempNoteLaneNum, (int)(((currentBarIndex * 16)+ (hit.collider.transform.parent.transform.localPosition.y / 0.3f)) * _noteTimingValue) , 0, false);
-                if (editorNoteMode == EditorNoteMode.LongNote)
-                {
-                    tempNoteData._isLongNote = true;
-                    initialNote.GetComponent<EditorNote>().longNotePole.SetActive(true);
-                    initialNote.GetComponent<EditorNote>().endPoint.SetActive(true);
-                }
-                _musicPattern._noteDatas.Add(tempNoteData);
-                Debug.Log("Note Instantiated");
-            }
+            NoteInstantiateOnMouseButtonDown(ray, hit);
         }
 
         if (mouseEvent == MouseEvent.Press && mousePointer == MousePointer.Left)        // 왼쪽 마우스 드래그
         {
-            if (hit.collider == null)
-                return;
-            if (hit.collider.tag == "EditorCollider" && editorNoteMode == EditorNoteMode.LongNote && initialNote != null)
-            {
-                int currentBarIndex;
-                if (hit.collider.transform.parent.name != "Base")
-                    currentBarIndex = hit.collider.transform.parent.parent.parent.GetComponent<EditorBar>().barIndex;
-                else
-                    currentBarIndex = hit.collider.transform.parent.parent.GetComponent<EditorBar>().barIndex;
-                _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming = (int)(((currentBarIndex * 16) + (hit.collider.transform.parent.transform.localPosition.y / 0.3f)) * _noteTimingValue);
-                initialNote.GetComponent<EditorNote>().endPoint.transform.localPosition = new Vector2(0, hit.collider.transform.position.y - initialNote.transform.position.y);
-                initialNote.GetComponent<EditorNote>().ResizePole();
-            }
+            NoteInstantiateOnMouseButtonPress(hit);
         }
 
         if (mouseEvent == MouseEvent.PointerUp && mousePointer == MousePointer.Left)    // 왼쪽 마우스 때는 순간
         {
-            if (initialNote != null)
-            {
-                if (editorNoteMode == EditorNoteMode.LongNote)
-                {
-                    if (_musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._startTiming == _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming)
-                    {
-                        _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming = 0;
-                        _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._isLongNote = false;
-                    }
-                    else
-                        initialNote.GetComponent<EditorNote>().longNotePole.GetComponent<BoxCollider2D>().enabled = true;
-                }
-                Debug.Log(_musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._laneNumber.ToString() + " " + _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._startTiming + " " + _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming);
-                initialNote = null;
-            }
+            NoteInstantiateOnMouseButtonUp();
         }
 
         if (mouseEvent == MouseEvent.PointerDown && mousePointer == MousePointer.Right)
