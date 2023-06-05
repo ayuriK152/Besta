@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
 using static Datas;
 using static Define;
@@ -64,10 +63,19 @@ public class EditorController : MonoBehaviour
 
         if (hit.collider.tag == "EditorNote")       // 이미 노트가 있는 부분에 중복 입력을 시도한 경우, 해당 노트 삭제후 입력 시작
         {
+            if (!_musicPattern._noteDatas.Remove(hit.collider.transform.parent.GetComponent<EditorNote>().noteData))
+            {
+                Debug.LogError("Note delete while initiating new note does not functioning!");
+                return;
+            }
+            
             Destroy(hit.collider.transform.parent.gameObject);
             Debug.Log("Note Deleted");
             hit = Physics2D.Raycast(ray.origin, ray.direction);
         }
+
+        if (hit.collider == null)
+            return;
 
         if (hit.collider.tag == "EditorCollider")
         {
@@ -104,7 +112,7 @@ public class EditorController : MonoBehaviour
                 currentNote.GetComponent<EditorNote>().longNotePole.SetActive(true);
                 currentNote.GetComponent<EditorNote>().endPoint.SetActive(true);
             }
-            _musicPattern._noteDatas.Add(tempNoteData);
+            currentNote.GetComponent<EditorNote>().noteData = tempNoteData;
             Debug.Log("Note Instantiated");
         }
     }
@@ -123,7 +131,7 @@ public class EditorController : MonoBehaviour
             else
                 currentBarIndex = editroColliderParent.parent.GetComponent<EditorBar>().barIndex;
 
-            _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming = (int)(((currentBarIndex * 16) + (editroColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue);
+            currentNote.GetComponent<EditorNote>().noteData._endTiming = (int)(((currentBarIndex * 16) + (editroColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue);
             currentNote.GetComponent<EditorNote>().endPoint.transform.localPosition = new Vector2(0, editorCollider.position.y - currentNote.transform.position.y);
             currentNote.GetComponent<EditorNote>().ResizePole();
         }
@@ -134,15 +142,16 @@ public class EditorController : MonoBehaviour
         {
             if (editorNoteMode == EditorNoteMode.LongNote)
             {
-                if (_musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._startTiming == _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming)
+                if (currentNote.GetComponent<EditorNote>().noteData._startTiming == currentNote.GetComponent<EditorNote>().noteData._endTiming)
                 {
-                    _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming = 0;
-                    _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._isLongNote = false;
+                    currentNote.GetComponent<EditorNote>().noteData._endTiming = 0;
+                    currentNote.GetComponent<EditorNote>().noteData._isLongNote = false;
                 }
                 else
                     currentNote.GetComponent<EditorNote>().longNotePole.GetComponent<BoxCollider2D>().enabled = true;
             }
-            Debug.Log(_musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._laneNumber.ToString() + " " + _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._startTiming + " " + _musicPattern._noteDatas[_musicPattern._noteDatas.Count - 1]._endTiming);
+            _musicPattern._noteDatas.Add(currentNote.GetComponent<EditorNote>().noteData);
+            Debug.Log(currentNote.GetComponent<EditorNote>().noteData._laneNumber.ToString() + " " + currentNote.GetComponent<EditorNote>().noteData._startTiming + " " + currentNote.GetComponent<EditorNote>().noteData._endTiming);
             currentNote = null;
         }
     }
@@ -172,6 +181,11 @@ public class EditorController : MonoBehaviour
         {
             if (hit.collider.tag == "EditorNote")
             {
+                if (!_musicPattern._noteDatas.Remove(hit.collider.transform.parent.GetComponent<EditorNote>().noteData))
+                {
+                    Debug.LogError("Note delete does not functioning!");
+                    return;
+                }
                 Destroy(hit.collider.transform.parent.gameObject);
                 Debug.Log("Note Deleted");
             }
