@@ -6,6 +6,7 @@ public class InputManager
 {
     public Action<MouseEvent, MousePointer> MouseAction = null;
     public Action KeyAction = null;
+    public Action<MouseScroll> ScrollAction = null;
 
     bool _pressed = false;
     float _pressedTime = 0f;
@@ -45,6 +46,18 @@ public class InputManager
             if (Input.GetMouseButtonDown(1))
             {
                 MouseAction.Invoke(MouseEvent.PointerDown, MousePointer.Right);
+            }
+        }
+
+        if (ScrollAction != null)
+        {
+            if (Input.mouseScrollDelta.y < 0)
+            {
+                ScrollAction.Invoke(MouseScroll.Down);
+            }
+            if (Input.mouseScrollDelta.y > 0)
+            {
+                ScrollAction.Invoke(MouseScroll.Up);
             }
         }
     }

@@ -37,4 +37,10 @@ public class Define
         Left,
         Right
     }
+
+    public enum MouseScroll
+    {
+        Down,
+        Up
+    }
 }

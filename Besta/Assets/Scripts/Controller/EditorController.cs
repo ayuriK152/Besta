@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 using static Datas;
 using static Define;
@@ -43,6 +44,8 @@ public class EditorController : MonoBehaviour
 
         Managers.Input.MouseAction -= EditorMouseEvent;
         Managers.Input.MouseAction += EditorMouseEvent;
+        Managers.Input.ScrollAction -= EditorMouseScrollEvent;
+        Managers.Input.ScrollAction += EditorMouseScrollEvent;
     }
 
     void Init()
@@ -156,8 +159,22 @@ public class EditorController : MonoBehaviour
         }
     }
 
+    void NoteDeleteOnMouseButtonDown(RaycastHit2D hit)
+    {
+        if (hit.collider.tag == "EditorNote")
+        {
+            if (!_musicPattern._noteDatas.Remove(hit.collider.transform.parent.GetComponent<EditorNote>().noteData))
+            {
+                Debug.LogError("Note delete does not functioning!");
+                return;
+            }
+            Destroy(hit.collider.transform.parent.gameObject);
+            Debug.Log("Note Deleted");
+        }
+    }
+
     GameObject currentNote;
-    void EditorMouseEvent(MouseEvent mouseEvent, MousePointer mousePointer)
+    void EditorMouseEvent(MouseEvent mouseEvent, MousePointer mousePointer)         // 에디터상에서의 마우스 입력 처리 메소드
     {
         Ray2D ray = new Ray2D(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
@@ -179,16 +196,21 @@ public class EditorController : MonoBehaviour
 
         if (mouseEvent == MouseEvent.PointerDown && mousePointer == MousePointer.Right)
         {
-            if (hit.collider.tag == "EditorNote")
-            {
-                if (!_musicPattern._noteDatas.Remove(hit.collider.transform.parent.GetComponent<EditorNote>().noteData))
-                {
-                    Debug.LogError("Note delete does not functioning!");
-                    return;
-                }
-                Destroy(hit.collider.transform.parent.gameObject);
-                Debug.Log("Note Deleted");
-            }
+            NoteDeleteOnMouseButtonDown(hit);
+        }
+    }
+
+    void EditorMouseScrollEvent(MouseScroll scrollDir)
+    {
+        if (scrollDir == MouseScroll.Down && _barInstatiatePoint.transform.localPosition.y < 0)
+        {
+            _barInstatiatePoint.transform.position += new Vector3(0, 0.8f, 0);
+            if (_barInstatiatePoint.transform.localPosition.y >= 0)
+                _barInstatiatePoint.transform.localPosition = new Vector3(0, 0, 0);
+        }
+        if (scrollDir == MouseScroll.Up)
+        {
+            _barInstatiatePoint.transform.position -= new Vector3(0, 0.8f, 0);
         }
     }
 }
