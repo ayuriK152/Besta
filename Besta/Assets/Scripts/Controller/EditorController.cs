@@ -27,6 +27,9 @@ public class EditorController : MonoBehaviour
     GameObject _editorBar;
     List<GameObject> _instantiatedEditorBars = new List<GameObject>();
 
+    public static Vector3 barUpperLimitPos;
+    public static Vector3 barLowerLimitPos;
+
     void Start()
     {
         editorNoteMode = EditorNoteMode.NormalNote;
@@ -36,16 +39,24 @@ public class EditorController : MonoBehaviour
         barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
         NoteCreateAction = null;
         BeatChangeAction = null;
+        barUpperLimitPos = GameObject.Find("UpperLimit").transform.position;
+        barLowerLimitPos = GameObject.Find("LowerLimit").transform.position;
         _noteInstantiatePoint = GameObject.Find("Notes");
         _barInstatiatePoint = GameObject.Find("Grid");
         _editorNote = Resources.Load<GameObject>("Prefabs/EditorNote");
         _editorBar = Resources.Load<GameObject>("Prefabs/EditorBar");
         Init();
 
+        Managers.Sound.managerAudioSource.clip = _musicPattern._musicSource;
         Managers.Input.MouseAction -= EditorMouseEvent;
         Managers.Input.MouseAction += EditorMouseEvent;
         Managers.Input.ScrollAction -= EditorMouseScrollEvent;
         Managers.Input.ScrollAction += EditorMouseScrollEvent;
+    }
+
+    void Update()
+    {
+
     }
 
     void Init()
@@ -212,5 +223,10 @@ public class EditorController : MonoBehaviour
         {
             _barInstatiatePoint.transform.position -= new Vector3(0, 0.8f, 0);
         }
+    }
+
+    void EditorScrollTemp()
+    {
+
     }
 }

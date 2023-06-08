@@ -8,8 +8,10 @@ public class Managers : MonoBehaviour
     static Managers ManagerInstance { get { Init(); return _managerInstance; } }
 
     private static InputManager _input = new InputManager();
-    public static InputManager Input { get { return _input; } set { _input = value; } }
-    void Start()
+    private static SoundManager _sound = new SoundManager();
+    public static InputManager Input { get { return _input; } }
+    public static SoundManager Sound { get { return _sound; } }
+    void Awake()
     {
         Init();
     }
@@ -33,5 +35,7 @@ public class Managers : MonoBehaviour
             DontDestroyOnLoad(go);
             _managerInstance = go.GetComponent<Managers>();
         }
+
+        _sound.Init();
     }
 }

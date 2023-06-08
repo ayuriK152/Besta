@@ -21,7 +21,8 @@ public class Define
         Two,
         Four,
         Eight,
-        Sixteen
+        Sixteen,
+        None
     }
 
     public enum MouseEvent
