@@ -13,11 +13,13 @@ public class InputManager
 
     public void OnUpdate()
     {
+        /** 키보드 입력 관리 */
         if (Input.anyKeyDown && KeyAction != null)
         {
             KeyAction.Invoke();
         }
 
+        /** 마우스 입력 관리 */
         if (MouseAction != null)
         {
             if (Input.GetMouseButton(0))
@@ -49,6 +51,7 @@ public class InputManager
             }
         }
 
+        /** 마우스 스크롤 입력 관리 */
         if (ScrollAction != null)
         {
             if (Input.mouseScrollDelta.y < 0)

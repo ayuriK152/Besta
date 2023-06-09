@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
 using static Datas;
 using static Define;
@@ -35,7 +34,7 @@ public class EditorController : MonoBehaviour
         editorNoteMode = EditorNoteMode.NormalNote;
         editorBeat = Beat.Eight;
         _musicPattern = new MusicPattern();
-        _noteTimingValue = (_musicPattern._musicSource.frequency / 4) / (_musicPattern._bpm / (double)60);
+        _noteTimingValue = (_musicPattern._musicSource.frequency / (_musicPattern._bpm / (double)60)) / 4;
         barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
         NoteCreateAction = null;
         BeatChangeAction = null;
@@ -54,9 +53,17 @@ public class EditorController : MonoBehaviour
         Managers.Input.ScrollAction += EditorMouseScrollEvent;
     }
 
+    bool _isGridScrolling = false;
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            _isGridScrolling = !_isGridScrolling;
+            if (!_isGridScrolling)
+                Managers.Sound.managerAudioSource.Pause();
+        }
+        if (_isGridScrolling)
+            EditorGridScroll();
     }
 
     void Init()
@@ -215,18 +222,33 @@ public class EditorController : MonoBehaviour
     {
         if (scrollDir == MouseScroll.Down && _barInstatiatePoint.transform.localPosition.y < 0)
         {
+            if (_isGridScrolling)
+            {
+                _isGridScrolling = false;
+                Managers.Sound.managerAudioSource.Pause();
+            }
             _barInstatiatePoint.transform.position += new Vector3(0, 0.8f, 0);
             if (_barInstatiatePoint.transform.localPosition.y >= 0)
                 _barInstatiatePoint.transform.localPosition = new Vector3(0, 0, 0);
         }
         if (scrollDir == MouseScroll.Up)
         {
+            if (_isGridScrolling)
+            {
+                _isGridScrolling = false;
+                Managers.Sound.managerAudioSource.Pause();
+            }
             _barInstatiatePoint.transform.position -= new Vector3(0, 0.8f, 0);
         }
     }
 
-    void EditorScrollTemp()
+    void EditorGridScroll()
     {
-
+        if (!Managers.Sound.managerAudioSource.isPlaying)
+        {
+            Managers.Sound.managerAudioSource.timeSamples = (int)(-_barInstatiatePoint.transform.localPosition.y / 4.8f * _noteTimingValue * 16);
+            Managers.Sound.managerAudioSource.Play();
+        }
+        _barInstatiatePoint.transform.localPosition = new Vector3(0, -Managers.Sound.managerAudioSource.timeSamples * 4.8f / (float)(_noteTimingValue * 16), 0);
     }
 }

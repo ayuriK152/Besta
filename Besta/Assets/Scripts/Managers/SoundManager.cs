@@ -13,5 +13,7 @@ public class SoundManager
         {
             managerAudioSource = go.AddComponent<AudioSource>();
         }
+        managerAudioSource.loop = false;
+        managerAudioSource.playOnAwake = false;
     }
 }
