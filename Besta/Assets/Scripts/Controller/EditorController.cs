@@ -11,14 +11,17 @@ public class EditorController : MonoBehaviour
 
     public Action<int, int, int, bool> NoteCreateAction;
     public static Action<Beat> BeatChangeAction;
+    public static Action<bool> PlayValueChangeAction;
 
     public static EditorNoteMode editorNoteMode;
     public static Beat editorBeat;
+    public static float currentPlayValue;       // 노래 파일의 샘플 레이트 기준 재생 시간 측정용
 
     [SerializeField]
     public MusicPattern _musicPattern;
     double _noteTimingValue;
     int barAmount;
+    float _editorBarMaxPosition;
 
     GameObject _noteInstantiatePoint;
     GameObject _barInstatiatePoint;
@@ -36,6 +39,8 @@ public class EditorController : MonoBehaviour
         _musicPattern = new MusicPattern();
         _noteTimingValue = (_musicPattern._musicSource.frequency / (_musicPattern._bpm / (double)60)) / 4;
         barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
+        _editorBarMaxPosition = Managers.Sound.managerAudioSource.clip.samples * 4.8f / ((float)_noteTimingValue * 16);
+        currentPlayValue = 0;
         NoteCreateAction = null;
         BeatChangeAction = null;
         barUpperLimitPos = GameObject.Find("UpperLimit").transform.position;
@@ -51,9 +56,11 @@ public class EditorController : MonoBehaviour
         Managers.Input.MouseAction += EditorMouseEvent;
         Managers.Input.ScrollAction -= EditorMouseScrollEvent;
         Managers.Input.ScrollAction += EditorMouseScrollEvent;
+        PlayValueChangeAction -= OnPlayValueChanged;
+        PlayValueChangeAction += OnPlayValueChanged;
     }
 
-    bool _isGridScrolling = false;
+    public static bool _isGridScrolling = false;
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -98,7 +105,7 @@ public class EditorController : MonoBehaviour
         if (hit.collider == null)
             return;
 
-        if (hit.collider.tag == "EditorCollider")
+        if (hit.collider.tag == "EditorCollider")   // 생성부 클릭시 노트 생성 및 데이터 입력
         {
             Transform editorCollider = hit.collider.transform;
             Transform editorColliderParent = editorCollider.parent;
@@ -220,25 +227,29 @@ public class EditorController : MonoBehaviour
 
     void EditorMouseScrollEvent(MouseScroll scrollDir)
     {
-        if (scrollDir == MouseScroll.Down && _barInstatiatePoint.transform.localPosition.y < 0)
+        if (scrollDir == MouseScroll.Down && currentPlayValue >= 0)
         {
             if (_isGridScrolling)
             {
                 _isGridScrolling = false;
                 Managers.Sound.managerAudioSource.Pause();
             }
-            _barInstatiatePoint.transform.position += new Vector3(0, 0.8f, 0);
-            if (_barInstatiatePoint.transform.localPosition.y >= 0)
-                _barInstatiatePoint.transform.localPosition = new Vector3(0, 0, 0);
+            currentPlayValue -= 0.01f;
+            if (currentPlayValue < 0)
+                currentPlayValue = 0;
+            OnPlayValueChanged(false);
         }
-        if (scrollDir == MouseScroll.Up)
+        if (scrollDir == MouseScroll.Up && currentPlayValue <= 1)
         {
             if (_isGridScrolling)
             {
                 _isGridScrolling = false;
                 Managers.Sound.managerAudioSource.Pause();
             }
-            _barInstatiatePoint.transform.position -= new Vector3(0, 0.8f, 0);
+            currentPlayValue += 0.01f;
+            if (currentPlayValue > 1)
+                currentPlayValue = 1;
+            OnPlayValueChanged(false);
         }
     }
 
@@ -246,9 +257,24 @@ public class EditorController : MonoBehaviour
     {
         if (!Managers.Sound.managerAudioSource.isPlaying)
         {
-            Managers.Sound.managerAudioSource.timeSamples = (int)(-_barInstatiatePoint.transform.localPosition.y / 4.8f * _noteTimingValue * 16);
+            Managers.Sound.managerAudioSource.timeSamples = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples);
+            if (Managers.Sound.managerAudioSource.timeSamples >= Managers.Sound.managerAudioSource.clip.samples)
+            {
+                Debug.LogWarning("Music time in PCM samples bigger than maximum value!");
+                _isGridScrolling = false;
+                return;
+            }
             Managers.Sound.managerAudioSource.Play();
         }
-        _barInstatiatePoint.transform.localPosition = new Vector3(0, -Managers.Sound.managerAudioSource.timeSamples * 4.8f / (float)(_noteTimingValue * 16), 0);
+        currentPlayValue = (float)Managers.Sound.managerAudioSource.timeSamples / Managers.Sound.managerAudioSource.clip.samples;
+        OnPlayValueChanged(false);
+    }
+
+    public static bool isPlayValueChanged;
+    void OnPlayValueChanged(bool callByUI)
+    {
+        _barInstatiatePoint.transform.localPosition = new Vector3(0, -currentPlayValue * _editorBarMaxPosition, 0);
+        if (!callByUI)
+            isPlayValueChanged = true;
     }
 }
