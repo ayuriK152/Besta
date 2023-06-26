@@ -12,10 +12,13 @@ public class EditorController : MonoBehaviour
     public Action<int, int, int, bool> NoteCreateAction;
     public static Action<Beat> BeatChangeAction;
     public static Action<bool> PlayValueChangeAction;
+    public static Action PatternSettingChangeAction;
 
     public static EditorNoteMode editorNoteMode;
     public static Beat editorBeat;
     public static float currentPlayValue;       // 노래 파일의 샘플 레이트 기준 재생 시간 측정용
+    public static int baseBPM;
+    public static int patternOffset;
 
     [SerializeField]
     public MusicPattern _musicPattern;
@@ -41,6 +44,9 @@ public class EditorController : MonoBehaviour
         barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
         _editorBarMaxPosition = Managers.Sound.managerAudioSource.clip.samples * 4.8f / ((float)_noteTimingValue * 16);
         currentPlayValue = 0;
+        baseBPM = _musicPattern._bpm;
+        patternOffset = _musicPattern._songOffset;
+
         NoteCreateAction = null;
         BeatChangeAction = null;
         barUpperLimitPos = GameObject.Find("UpperLimit").transform.position;
@@ -58,6 +64,8 @@ public class EditorController : MonoBehaviour
         Managers.Input.ScrollAction += EditorMouseScrollEvent;
         PlayValueChangeAction -= OnPlayValueChanged;
         PlayValueChangeAction += OnPlayValueChanged;
+        PatternSettingChangeAction -= OnSettingValueChanged;
+        PatternSettingChangeAction += OnSettingValueChanged;
     }
 
     public static bool _isGridScrolling = false;
@@ -186,6 +194,8 @@ public class EditorController : MonoBehaviour
 
     void NoteDeleteOnMouseButtonDown(RaycastHit2D hit)
     {
+        if (hit.collider == null)
+            return;
         if (hit.collider.tag == "EditorNote")
         {
             if (!_musicPattern._noteDatas.Remove(hit.collider.transform.parent.GetComponent<EditorNote>().noteData))
@@ -234,7 +244,7 @@ public class EditorController : MonoBehaviour
                 _isGridScrolling = false;
                 Managers.Sound.managerAudioSource.Pause();
             }
-            currentPlayValue -= 0.01f;
+            currentPlayValue -= 0.005f;
             if (currentPlayValue < 0)
                 currentPlayValue = 0;
             OnPlayValueChanged(false);
@@ -246,7 +256,7 @@ public class EditorController : MonoBehaviour
                 _isGridScrolling = false;
                 Managers.Sound.managerAudioSource.Pause();
             }
-            currentPlayValue += 0.01f;
+            currentPlayValue += 0.005f;
             if (currentPlayValue > 1)
                 currentPlayValue = 1;
             OnPlayValueChanged(false);
@@ -276,5 +286,17 @@ public class EditorController : MonoBehaviour
         _barInstatiatePoint.transform.localPosition = new Vector3(0, -currentPlayValue * _editorBarMaxPosition, 0);
         if (!callByUI)
             isPlayValueChanged = true;
+    }
+
+    void OnSettingValueChanged()
+    {
+        if (_musicPattern._bpm != baseBPM)
+        {
+            _musicPattern._bpm = baseBPM;
+        }
+        if (_musicPattern._songOffset != patternOffset)
+        {
+            _musicPattern._songOffset = patternOffset;
+        }
     }
 }

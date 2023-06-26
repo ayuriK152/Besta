@@ -10,6 +10,8 @@ public class EditorUI : MonoBehaviour
     TMP_Dropdown beatChangeDropdown;
     TMP_Dropdown noteModeChangeDropdown;
     public Slider editorPlayValueSlider;
+    TMP_InputField baseBPMInputField;
+    TMP_InputField offsetInputField;
 
     void Start()
     {
@@ -19,6 +21,10 @@ public class EditorUI : MonoBehaviour
         noteModeChangeDropdown.value = 0;
         editorPlayValueSlider = transform.Find("PlayValueSlider").transform.GetComponent<Slider>();
         editorPlayValueSlider.value = 0;
+        baseBPMInputField = GameObject.Find("BPMSetting").transform.Find("InputField").GetComponent<TMP_InputField>();
+        baseBPMInputField.text = EditorController.baseBPM.ToString();
+        offsetInputField = GameObject.Find("OffsetSetting").transform.Find("InputField").GetComponent<TMP_InputField>();
+        offsetInputField.text = EditorController.patternOffset.ToString();
     }
 
     void Update()
@@ -52,5 +58,17 @@ public class EditorUI : MonoBehaviour
             EditorController.currentPlayValue = editorPlayValueSlider.value;
             EditorController.PlayValueChangeAction.Invoke(true);
         }
+    }
+
+    public void OnBaseBPMChange()
+    {
+        EditorController.baseBPM = int.Parse(baseBPMInputField.text);
+        EditorController.PatternSettingChangeAction.Invoke();
+    }
+
+    public void OnOffsetChange()
+    {
+        EditorController.patternOffset = int.Parse(offsetInputField.text);
+        EditorController.PatternSettingChangeAction.Invoke();
     }
 }
