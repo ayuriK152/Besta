@@ -277,13 +277,18 @@ public class EditorController : MonoBehaviour
             Managers.Sound.managerAudioSource.Play();
         }
         currentPlayValue = (float)Managers.Sound.managerAudioSource.timeSamples / Managers.Sound.managerAudioSource.clip.samples;
+        if (currentPlayValue >= 1)
+        {
+            Managers.Sound.managerAudioSource.Pause();
+            _isGridScrolling = false;
+        }
         OnPlayValueChanged(false);
     }
 
     public static bool isPlayValueChanged;
     void OnPlayValueChanged(bool callByUI)
     {
-        _barInstatiatePoint.transform.localPosition = new Vector3(0, -currentPlayValue * _editorBarMaxPosition, 0);
+        _barInstatiatePoint.transform.localPosition = new Vector3(0, -currentPlayValue * _editorBarMaxPosition - (patternOffset / ((float)_noteTimingValue * 16)) * 4.8f, 0);
         if (!callByUI)
             isPlayValueChanged = true;
     }
@@ -297,6 +302,33 @@ public class EditorController : MonoBehaviour
         if (_musicPattern._songOffset != patternOffset)
         {
             _musicPattern._songOffset = patternOffset;
+            _musicPattern._songLength = _musicPattern._musicSource.samples + _musicPattern._songOffset;
+
+            if (barAmount < ((int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1))   // 오프셋 조절에 따라 채보 길이가 늘어나는 경우
+            {
+                Debug.LogFormat("Bar amount increased! Before: {0}, After: {1}", barAmount, (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1);
+                for (int i = barAmount; i < (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1; i++)
+                {
+                    _instantiatedEditorBars.Add(Instantiate(_editorBar, _barInstatiatePoint.transform));
+                    _instantiatedEditorBars[i].transform.localPosition = new Vector3(0, i * 4.8f, 0);
+                    _instantiatedEditorBars[i].name = _editorBar.name + " " + (i + 1);
+                    _instantiatedEditorBars[i].GetComponent<EditorBar>().barIndex = i;
+                }
+                barAmount = _instantiatedEditorBars.Count;
+            }
+
+            else if (barAmount > ((int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1))  // 오프셋 조절에 따라 채보 길이가 줄어드는 경우
+            {
+                Debug.LogFormat("Bar amount decreased! Before: {0}, After: {1}", barAmount, (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1);
+                for (int i = barAmount - 1; i > (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1; i--)
+                {
+                    GameObject temp = _instantiatedEditorBars[i];
+                    Destroy(temp);
+                    _instantiatedEditorBars.RemoveAt(i);
+                }
+                barAmount = _instantiatedEditorBars.Count;
+            }
+            OnPlayValueChanged(false);
         }
     }
 }
