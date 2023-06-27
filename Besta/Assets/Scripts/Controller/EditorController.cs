@@ -13,6 +13,7 @@ public class EditorController : MonoBehaviour
     public static Action<Beat> BeatChangeAction;
     public static Action<bool> PlayValueChangeAction;
     public static Action PatternSettingChangeAction;
+    public static Action PatternSaveAction;
 
     public static EditorNoteMode editorNoteMode;
     public static Beat editorBeat;
@@ -20,8 +21,8 @@ public class EditorController : MonoBehaviour
     public static int baseBPM;
     public static int patternOffset;
 
-    [SerializeField]
-    public MusicPattern _musicPattern;
+    
+    MusicPattern _musicPattern;
     double _noteTimingValue;
     int barAmount;
     float _editorBarMaxPosition;
@@ -71,6 +72,8 @@ public class EditorController : MonoBehaviour
         PlayValueChangeAction += OnPlayValueChanged;
         PatternSettingChangeAction -= OnSettingValueChanged;
         PatternSettingChangeAction += OnSettingValueChanged;
+        PatternSaveAction -= SaveMusicPatternData;
+        PatternSaveAction += SaveMusicPatternData;
     }
 
     void Update()
@@ -336,5 +339,10 @@ public class EditorController : MonoBehaviour
             }
             OnPlayValueChanged(false);
         }
+    }
+
+    void SaveMusicPatternData()
+    {
+        Managers.Data.SavePatternAsJson(_musicPattern, "test");
     }
 }

@@ -9,8 +9,10 @@ public class Managers : MonoBehaviour
 
     private static InputManager _input = new InputManager();
     private static SoundManager _sound = new SoundManager();
+    private static DataManager _data = new DataManager();
     public static InputManager Input { get { return _input; } }
     public static SoundManager Sound { get { return _sound; } }
+    public static DataManager Data { get { return _data; } }
     void Awake()
     {
         Init();

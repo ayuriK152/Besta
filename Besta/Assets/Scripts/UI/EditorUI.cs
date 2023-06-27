@@ -71,4 +71,9 @@ public class EditorUI : MonoBehaviour
         EditorController.patternOffset = int.Parse(offsetInputField.text);
         EditorController.PatternSettingChangeAction.Invoke();
     }
+
+    public void OnSaveButtonClick()
+    {
+        EditorController.PatternSaveAction.Invoke();
+    }
 }
