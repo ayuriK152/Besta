@@ -30,10 +30,13 @@ public class EditorController : MonoBehaviour
     GameObject _barInstatiatePoint;
     GameObject _editorNote;
     GameObject _editorBar;
+    GameObject currentNote;
     List<GameObject> _instantiatedEditorBars = new List<GameObject>();
 
     public static Vector3 barUpperLimitPos;
     public static Vector3 barLowerLimitPos;
+    public static bool isPlayValueChanged;
+    public static bool _isGridScrolling;
 
     void Start()
     {
@@ -46,6 +49,8 @@ public class EditorController : MonoBehaviour
         currentPlayValue = 0;
         baseBPM = _musicPattern._bpm;
         patternOffset = _musicPattern._songOffset;
+        isPlayValueChanged = false;
+        _isGridScrolling = false;
 
         NoteCreateAction = null;
         BeatChangeAction = null;
@@ -68,7 +73,6 @@ public class EditorController : MonoBehaviour
         PatternSettingChangeAction += OnSettingValueChanged;
     }
 
-    public static bool _isGridScrolling = false;
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -208,7 +212,6 @@ public class EditorController : MonoBehaviour
         }
     }
 
-    GameObject currentNote;
     void EditorMouseEvent(MouseEvent mouseEvent, MousePointer mousePointer)         // 에디터상에서의 마우스 입력 처리 메소드
     {
         Ray2D ray = new Ray2D(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
@@ -267,25 +270,28 @@ public class EditorController : MonoBehaviour
     {
         if (!Managers.Sound.managerAudioSource.isPlaying)
         {
-            Managers.Sound.managerAudioSource.timeSamples = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples);
-            if (Managers.Sound.managerAudioSource.timeSamples >= Managers.Sound.managerAudioSource.clip.samples)
+            int currentSample = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples);
+            if (currentSample != Managers.Sound.managerAudioSource.timeSamples)
             {
-                Debug.LogWarning("Music time in PCM samples bigger than maximum value!");
-                _isGridScrolling = false;
-                return;
+                Managers.Sound.managerAudioSource.timeSamples = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples);
+                if (Managers.Sound.managerAudioSource.timeSamples >= Managers.Sound.managerAudioSource.clip.samples)
+                {
+                    Debug.LogWarning("Music time in PCM samples bigger than maximum value!");
+                    _isGridScrolling = false;
+                    return;
+                }
+                Managers.Sound.managerAudioSource.Play();
             }
-            Managers.Sound.managerAudioSource.Play();
+            else
+            {
+                _isGridScrolling = false;
+                isPlayValueChanged = false;
+            }
         }
         currentPlayValue = (float)Managers.Sound.managerAudioSource.timeSamples / Managers.Sound.managerAudioSource.clip.samples;
-        if (currentPlayValue >= 1)
-        {
-            Managers.Sound.managerAudioSource.Pause();
-            _isGridScrolling = false;
-        }
         OnPlayValueChanged(false);
     }
 
-    public static bool isPlayValueChanged;
     void OnPlayValueChanged(bool callByUI)
     {
         _barInstatiatePoint.transform.localPosition = new Vector3(0, -currentPlayValue * _editorBarMaxPosition - (patternOffset / ((float)_noteTimingValue * 16)) * 4.8f, 0);
