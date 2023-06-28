@@ -1,4 +1,5 @@
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using static Define;
@@ -75,5 +76,10 @@ public class EditorUI : MonoBehaviour
     public void OnSaveButtonClick()
     {
         EditorController.PatternSaveAction.Invoke();
+    }
+
+    public void OnLoadButtonClick()
+    {
+        EditorController.PatternLoadAction.Invoke(EditorUtility.OpenFilePanel("Select pattern data file", "", "json"));
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using static Datas;
 using static Define;
@@ -14,6 +15,7 @@ public class EditorController : MonoBehaviour
     public static Action<bool> PlayValueChangeAction;
     public static Action PatternSettingChangeAction;
     public static Action PatternSaveAction;
+    public static Action<string> PatternLoadAction;
 
     public static EditorNoteMode editorNoteMode;
     public static Beat editorBeat;
@@ -74,6 +76,8 @@ public class EditorController : MonoBehaviour
         PatternSettingChangeAction += OnSettingValueChanged;
         PatternSaveAction -= SaveMusicPatternData;
         PatternSaveAction += SaveMusicPatternData;
+        PatternLoadAction -= LoadMusicPatternData;
+        PatternLoadAction += LoadMusicPatternData;
     }
 
     void Update()
@@ -344,5 +348,15 @@ public class EditorController : MonoBehaviour
     void SaveMusicPatternData()
     {
         Managers.Data.SavePatternAsJson(_musicPattern, "test");
+    }
+
+    void LoadMusicPatternData(string path)
+    {
+        MusicPattern tempPatternData = Managers.Data.LoadData<MusicPattern>(path);
+        if (tempPatternData == null)
+        {
+            Debug.LogError("Pattern load failed!");
+            return;
+        }
     }
 }
