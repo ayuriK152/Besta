@@ -26,46 +26,52 @@ public class EditorController : MonoBehaviour
     
     MusicPattern _musicPattern;
     double _noteTimingValue;
-    int barAmount;
+    int _barAmount;
     float _editorBarMaxPosition;
 
     GameObject _noteInstantiatePoint;
     GameObject _barInstatiatePoint;
     GameObject _editorNote;
     GameObject _editorBar;
-    GameObject currentNote;
+    GameObject _currentNote;
     List<GameObject> _instantiatedEditorBars = new List<GameObject>();
 
     public static Vector3 barUpperLimitPos;
     public static Vector3 barLowerLimitPos;
     public static bool isPlayValueChanged;
-    public static bool _isGridScrolling;
+    public static bool isGridScrolling;
 
     void Start()
     {
         editorNoteMode = EditorNoteMode.NormalNote;
         editorBeat = Beat.Eight;
         _musicPattern = new MusicPattern();
+        isPlayValueChanged = false;
+        isGridScrolling = false;
+
+        // 채보 판정 타이밍과 같은 수치 설정
         _noteTimingValue = (_musicPattern._musicSource.frequency / (_musicPattern._bpm / (double)60)) / 4;
-        barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
+        _barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
         _editorBarMaxPosition = Managers.Sound.managerAudioSource.clip.samples * 4.8f / ((float)_noteTimingValue * 16);
         currentPlayValue = 0;
         baseBPM = _musicPattern._bpm;
         patternOffset = _musicPattern._songOffset;
-        isPlayValueChanged = false;
-        _isGridScrolling = false;
 
-        NoteCreateAction = null;
-        BeatChangeAction = null;
+        // 바인딩
         barUpperLimitPos = GameObject.Find("UpperLimit").transform.position;
         barLowerLimitPos = GameObject.Find("LowerLimit").transform.position;
         _noteInstantiatePoint = GameObject.Find("Notes");
         _barInstatiatePoint = GameObject.Find("Grid");
         _editorNote = Resources.Load<GameObject>("Prefabs/EditorNote");
         _editorBar = Resources.Load<GameObject>("Prefabs/EditorBar");
+        Managers.Sound.managerAudioSource.clip = _musicPattern._musicSource;
+
+        // 초기 마디 생성용 Init 메서드
         Init();
 
-        Managers.Sound.managerAudioSource.clip = _musicPattern._musicSource;
+        // 대리자 초기화
+        NoteCreateAction = null;
+        BeatChangeAction = null;
         Managers.Input.MouseAction -= EditorMouseEvent;
         Managers.Input.MouseAction += EditorMouseEvent;
         Managers.Input.ScrollAction -= EditorMouseScrollEvent;
@@ -84,17 +90,17 @@ public class EditorController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            _isGridScrolling = !_isGridScrolling;
-            if (!_isGridScrolling)
+            isGridScrolling = !isGridScrolling;
+            if (!isGridScrolling)
                 Managers.Sound.managerAudioSource.Pause();
         }
-        if (_isGridScrolling)
+        if (isGridScrolling)
             EditorGridScroll();
     }
 
     void Init()
     {
-        for (int i = 0; i < barAmount; i++)
+        for (int i = 0; i < _barAmount; i++)
         {
             _instantiatedEditorBars.Add(Instantiate(_editorBar, _barInstatiatePoint.transform));
             _instantiatedEditorBars[i].transform.localPosition = new Vector3(0, i * 4.8f, 0);
@@ -128,7 +134,7 @@ public class EditorController : MonoBehaviour
         {
             Transform editorCollider = hit.collider.transform;
             Transform editorColliderParent = editorCollider.parent;
-            currentNote = Instantiate(_editorNote, new Vector3(editorCollider.position.x, editorCollider.position.y, -2), editorCollider.rotation, _noteInstantiatePoint.transform);
+            _currentNote = Instantiate(_editorNote, new Vector3(editorCollider.position.x, editorCollider.position.y, -2), editorCollider.rotation, _noteInstantiatePoint.transform);
             LaneNumber tempNoteLaneNum = LaneNumber.None;
             switch (hit.collider.name)
             {
@@ -156,10 +162,10 @@ public class EditorController : MonoBehaviour
             if (editorNoteMode == EditorNoteMode.LongNote)
             {
                 tempNoteData._isLongNote = true;
-                currentNote.GetComponent<EditorNote>().longNotePole.SetActive(true);
-                currentNote.GetComponent<EditorNote>().endPoint.SetActive(true);
+                _currentNote.GetComponent<EditorNote>().longNotePole.SetActive(true);
+                _currentNote.GetComponent<EditorNote>().endPoint.SetActive(true);
             }
-            currentNote.GetComponent<EditorNote>().noteData = tempNoteData;
+            _currentNote.GetComponent<EditorNote>().noteData = tempNoteData;
             Debug.Log("Note Instantiated");
         }
     }
@@ -167,7 +173,7 @@ public class EditorController : MonoBehaviour
     {
         if (hit.collider == null)
             return;
-        if (hit.collider.tag == "EditorCollider" && editorNoteMode == EditorNoteMode.LongNote && currentNote != null)
+        if (hit.collider.tag == "EditorCollider" && editorNoteMode == EditorNoteMode.LongNote && _currentNote != null)
         {
             Transform editorCollider = hit.collider.transform;
             Transform editroColliderParent = editorCollider.parent;
@@ -178,28 +184,28 @@ public class EditorController : MonoBehaviour
             else
                 currentBarIndex = editroColliderParent.parent.GetComponent<EditorBar>().barIndex;
 
-            currentNote.GetComponent<EditorNote>().noteData._endTiming = (int)(((currentBarIndex * 16) + (editroColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue);
-            currentNote.GetComponent<EditorNote>().endPoint.transform.localPosition = new Vector2(0, editorCollider.position.y - currentNote.transform.position.y);
-            currentNote.GetComponent<EditorNote>().ResizePole();
+            _currentNote.GetComponent<EditorNote>().noteData._endTiming = (int)(((currentBarIndex * 16) + (editroColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue);
+            _currentNote.GetComponent<EditorNote>().endPoint.transform.localPosition = new Vector2(0, editorCollider.position.y - _currentNote.transform.position.y);
+            _currentNote.GetComponent<EditorNote>().ResizePole();
         }
     }
     void NoteInstantiateOnMouseButtonUp()
     {
-        if (currentNote != null)
+        if (_currentNote != null)
         {
             if (editorNoteMode == EditorNoteMode.LongNote)
             {
-                if (currentNote.GetComponent<EditorNote>().noteData._startTiming == currentNote.GetComponent<EditorNote>().noteData._endTiming)
+                if (_currentNote.GetComponent<EditorNote>().noteData._startTiming == _currentNote.GetComponent<EditorNote>().noteData._endTiming)
                 {
-                    currentNote.GetComponent<EditorNote>().noteData._endTiming = 0;
-                    currentNote.GetComponent<EditorNote>().noteData._isLongNote = false;
+                    _currentNote.GetComponent<EditorNote>().noteData._endTiming = 0;
+                    _currentNote.GetComponent<EditorNote>().noteData._isLongNote = false;
                 }
                 else
-                    currentNote.GetComponent<EditorNote>().longNotePole.GetComponent<BoxCollider2D>().enabled = true;
+                    _currentNote.GetComponent<EditorNote>().longNotePole.GetComponent<BoxCollider2D>().enabled = true;
             }
-            _musicPattern._noteDatas.Add(currentNote.GetComponent<EditorNote>().noteData);
-            Debug.Log(currentNote.GetComponent<EditorNote>().noteData._laneNumber.ToString() + " " + currentNote.GetComponent<EditorNote>().noteData._startTiming + " " + currentNote.GetComponent<EditorNote>().noteData._endTiming);
-            currentNote = null;
+            _musicPattern._noteDatas.Add(_currentNote.GetComponent<EditorNote>().noteData);
+            Debug.Log(_currentNote.GetComponent<EditorNote>().noteData._laneNumber.ToString() + " " + _currentNote.GetComponent<EditorNote>().noteData._startTiming + " " + _currentNote.GetComponent<EditorNote>().noteData._endTiming);
+            _currentNote = null;
         }
     }
 
@@ -249,9 +255,9 @@ public class EditorController : MonoBehaviour
     {
         if (scrollDir == MouseScroll.Down && currentPlayValue >= 0)
         {
-            if (_isGridScrolling)
+            if (isGridScrolling)
             {
-                _isGridScrolling = false;
+                isGridScrolling = false;
                 Managers.Sound.managerAudioSource.Pause();
             }
             currentPlayValue -= 0.005f;
@@ -261,9 +267,9 @@ public class EditorController : MonoBehaviour
         }
         if (scrollDir == MouseScroll.Up && currentPlayValue <= 1)
         {
-            if (_isGridScrolling)
+            if (isGridScrolling)
             {
-                _isGridScrolling = false;
+                isGridScrolling = false;
                 Managers.Sound.managerAudioSource.Pause();
             }
             currentPlayValue += 0.005f;
@@ -281,17 +287,16 @@ public class EditorController : MonoBehaviour
         {
             if (currentPlayValue == 1)
             {
-                _isGridScrolling = false;
+                isGridScrolling = false;
                 isPlayValueChanged = false;
                 return;
             }
             else
             {
-                Managers.Sound.managerAudioSource.timeSamples = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples);
                 if (Managers.Sound.managerAudioSource.timeSamples >= Managers.Sound.managerAudioSource.clip.samples)
                 {
                     Debug.LogWarning("Music time in PCM samples bigger than maximum value!");
-                    _isGridScrolling = false;
+                    isGridScrolling = false;
                     return;
                 }
                 Managers.Sound.managerAudioSource.Play();
@@ -321,29 +326,29 @@ public class EditorController : MonoBehaviour
             _musicPattern._songOffset = patternOffset;
             _musicPattern._songLength = _musicPattern._musicSource.samples + _musicPattern._songOffset;
 
-            if (barAmount < ((int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1))   // 오프셋 조절에 따라 채보 길이가 늘어나는 경우
+            if (_barAmount < ((int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1))   // 오프셋 조절에 따라 채보 길이가 늘어나는 경우
             {
-                Debug.LogFormat("Bar amount increased! Before: {0}, After: {1}", barAmount, (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1);
-                for (int i = barAmount; i < (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1; i++)
+                Debug.Log($"Bar amount increased! Before: {_barAmount}, After: {(int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1}");
+                for (int i = _barAmount; i < (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1; i++)
                 {
                     _instantiatedEditorBars.Add(Instantiate(_editorBar, _barInstatiatePoint.transform));
                     _instantiatedEditorBars[i].transform.localPosition = new Vector3(0, i * 4.8f, 0);
                     _instantiatedEditorBars[i].name = _editorBar.name + " " + (i + 1);
                     _instantiatedEditorBars[i].GetComponent<EditorBar>().barIndex = i;
                 }
-                barAmount = _instantiatedEditorBars.Count;
+                _barAmount = _instantiatedEditorBars.Count;
             }
 
-            else if (barAmount > ((int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1))  // 오프셋 조절에 따라 채보 길이가 줄어드는 경우
+            else if (_barAmount > ((int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1))  // 오프셋 조절에 따라 채보 길이가 줄어드는 경우
             {
-                Debug.LogFormat("Bar amount decreased! Before: {0}, After: {1}", barAmount, (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1);
-                for (int i = barAmount - 1; i > (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1; i--)
+                Debug.Log($"Bar amount decreased! Before: {_barAmount}, After: {(int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1}");
+                for (int i = _barAmount - 1; i >= (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1; i--)
                 {
                     GameObject temp = _instantiatedEditorBars[i];
                     Destroy(temp);
                     _instantiatedEditorBars.RemoveAt(i);
                 }
-                barAmount = _instantiatedEditorBars.Count;
+                _barAmount = _instantiatedEditorBars.Count;
             }
             OnPlayValueChanged(false);
         }

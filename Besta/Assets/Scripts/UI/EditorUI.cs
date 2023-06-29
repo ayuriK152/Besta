@@ -30,7 +30,7 @@ public class EditorUI : MonoBehaviour
 
     void Update()
     {
-        if (EditorController._isGridScrolling)
+        if (EditorController.isGridScrolling)
             editorPlayValueSlider.value = EditorController.currentPlayValue;
         if (EditorController.isPlayValueChanged)
         {
@@ -54,7 +54,7 @@ public class EditorUI : MonoBehaviour
 
     public void OnPlayValueChange()
     {
-        if (!EditorController._isGridScrolling)
+        if (!EditorController.isGridScrolling)
         {
             EditorController.currentPlayValue = editorPlayValueSlider.value;
             EditorController.PlayValueChangeAction.Invoke(true);
