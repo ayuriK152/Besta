@@ -6,16 +6,17 @@ public class DataManager
 {
     public void SavePatternAsJson<T>(T obj, string patternName)
     {
-        if (!Directory.Exists(Application.dataPath + "/Patterns/"))
+        if (!Directory.Exists($"{Application.dataPath}/Patterns/"))
         {
-            Directory.CreateDirectory(Application.dataPath + "/Patterns/");
+            Directory.CreateDirectory($"{Application.dataPath}/Patterns/");
             Debug.Log("Pattern directory does not exists, Pattern directory is added automatically");
         }
-        File.WriteAllText(Application.dataPath + "/Patterns/" + patternName + ".json", JsonUtility.ToJson(obj));
+        Directory.CreateDirectory($"{Application.dataPath}/Patterns/{patternName}");
+        File.WriteAllText($"{Application.dataPath}/Patterns/{patternName}/data.json", JsonUtility.ToJson(obj));
         Debug.Log("File saved succesfully!");
     }
 
-    public T LoadData<T>(string path)
+    public T LoadJsonData<T>(string path)
     {
         string loadedText;
         try
@@ -27,7 +28,7 @@ public class DataManager
         }
         catch (Exception e)
         {
-            Debug.LogError("File load failed from: " + path);
+            Debug.LogError($"File load failed from: {path}");
             return default(T);
         }
     }

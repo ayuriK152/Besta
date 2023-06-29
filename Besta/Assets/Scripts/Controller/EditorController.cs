@@ -275,10 +275,17 @@ public class EditorController : MonoBehaviour
 
     void EditorGridScroll()
     {
+        currentPlayValue = (float)Managers.Sound.managerAudioSource.timeSamples / Managers.Sound.managerAudioSource.clip.samples;
+        OnPlayValueChanged(false);
         if (!Managers.Sound.managerAudioSource.isPlaying)
         {
-            int currentSample = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples);
-            if (currentSample != Managers.Sound.managerAudioSource.timeSamples)
+            if (currentPlayValue == 1)
+            {
+                _isGridScrolling = false;
+                isPlayValueChanged = false;
+                return;
+            }
+            else
             {
                 Managers.Sound.managerAudioSource.timeSamples = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples);
                 if (Managers.Sound.managerAudioSource.timeSamples >= Managers.Sound.managerAudioSource.clip.samples)
@@ -289,14 +296,7 @@ public class EditorController : MonoBehaviour
                 }
                 Managers.Sound.managerAudioSource.Play();
             }
-            else
-            {
-                _isGridScrolling = false;
-                isPlayValueChanged = false;
-            }
         }
-        currentPlayValue = (float)Managers.Sound.managerAudioSource.timeSamples / Managers.Sound.managerAudioSource.clip.samples;
-        OnPlayValueChanged(false);
     }
 
     void OnPlayValueChanged(bool callByUI)
@@ -304,6 +304,10 @@ public class EditorController : MonoBehaviour
         _barInstatiatePoint.transform.localPosition = new Vector3(0, -currentPlayValue * _editorBarMaxPosition - (patternOffset / ((float)_noteTimingValue * 16)) * 4.8f, 0);
         if (!callByUI)
             isPlayValueChanged = true;
+        if (currentPlayValue != 1)
+            Managers.Sound.managerAudioSource.timeSamples = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples);
+        else
+            Managers.Sound.managerAudioSource.timeSamples = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples) - 1;
     }
 
     void OnSettingValueChanged()
@@ -352,7 +356,7 @@ public class EditorController : MonoBehaviour
 
     void LoadMusicPatternData(string path)
     {
-        MusicPattern tempPatternData = Managers.Data.LoadData<MusicPattern>(path);
+        MusicPattern tempPatternData = Managers.Data.LoadJsonData<MusicPattern>(path);
         if (tempPatternData == null)
         {
             Debug.LogError("Pattern load failed!");

@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using static Define;
 
 public class Datas
 {
+    [Serializable]
     public class Note
     {
         public LaneNumber _laneNumber;
