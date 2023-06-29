@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using static Define;
 
 public class InputManager
@@ -22,6 +23,9 @@ public class InputManager
         /** 마우스 입력 관리 */
         if (MouseAction != null)
         {
+            if (EventSystem.current.IsPointerOverGameObject())      // UI 클릭
+                return;
+
             if (Input.GetMouseButton(0))
             {
                 if (!_pressed)
