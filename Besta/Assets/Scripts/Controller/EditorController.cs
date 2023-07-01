@@ -35,6 +35,7 @@ public class EditorController : MonoBehaviour
     GameObject _editorBar;
     GameObject _currentNote;
     List<GameObject> _instantiatedEditorBars = new List<GameObject>();
+    List<GameObject> _instantiatedEditorNotes = new List<GameObject>();
 
     public static Vector3 barUpperLimitPos;
     public static Vector3 barLowerLimitPos;
@@ -122,7 +123,8 @@ public class EditorController : MonoBehaviour
                 Debug.LogError("Note delete while initiating new note does not functioning!");
                 return;
             }
-            
+
+            _instantiatedEditorNotes.Remove(hit.collider.transform.parent.gameObject);
             Destroy(hit.collider.transform.parent.gameObject);
             Debug.Log("Note Deleted");
             hit = Physics2D.Raycast(ray.origin, ray.direction);
@@ -167,6 +169,7 @@ public class EditorController : MonoBehaviour
                 _currentNote.GetComponent<EditorNote>().endPoint.SetActive(true);
             }
             _currentNote.GetComponent<EditorNote>().noteData = tempNoteData;
+            _instantiatedEditorNotes.Add(_currentNote);
             Debug.Log("Note Instantiated");
         }
     }
@@ -221,6 +224,7 @@ public class EditorController : MonoBehaviour
                 Debug.LogError("Note delete does not functioning!");
                 return;
             }
+            _instantiatedEditorNotes.Remove(hit.collider.transform.parent.gameObject);
             Destroy(hit.collider.transform.parent.gameObject);
             Debug.Log("Note Deleted");
         }
@@ -375,6 +379,11 @@ public class EditorController : MonoBehaviour
             Destroy(temp);
             _instantiatedEditorBars.RemoveAt(i);
         }
+        foreach (GameObject n in _instantiatedEditorNotes)
+        {
+            Destroy(n);
+        }
+        _instantiatedEditorNotes.Clear();
         _barAmount = 0;
         Init();
         foreach (Note data in _musicPattern._noteDatas)
@@ -410,6 +419,7 @@ public class EditorController : MonoBehaviour
                 tempEditorNoteData.longNotePole.GetComponent<BoxCollider2D>().enabled = true;
             }
             _currentNote.GetComponent<EditorNote>().noteData = data;
+            _instantiatedEditorNotes.Add(_currentNote);
             _currentNote = null;
         }
     }
