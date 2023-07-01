@@ -67,10 +67,20 @@ public class EditorUI : MonoBehaviour
         EditorController.PatternSettingChangeAction.Invoke();
     }
 
+    public void OnBaseBPMChangeByController()
+    {
+        baseBPMInputField.text = EditorController.baseBPM.ToString();
+    }
+
     public void OnOffsetChange()
     {
         EditorController.patternOffset = int.Parse(offsetInputField.text);
         EditorController.PatternSettingChangeAction.Invoke();
+    }
+
+    public void OnOffsetChangeByController()
+    {
+        offsetInputField.text = EditorController.patternOffset.ToString();
     }
 
     public void OnSaveButtonClick()

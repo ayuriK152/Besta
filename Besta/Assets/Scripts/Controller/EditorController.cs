@@ -373,6 +373,8 @@ public class EditorController : MonoBehaviour
             return;
         }
         _musicPattern = tempPatternData;
+
+        // 기존 작업물 내용 삭제 과정
         for (int i = _barAmount - 1; i >= 0; i--)
         {
             GameObject temp = _instantiatedEditorBars[i];
@@ -386,6 +388,8 @@ public class EditorController : MonoBehaviour
         _instantiatedEditorNotes.Clear();
         _barAmount = 0;
         Init();
+
+        // 노트 데이터 로드 및 생성
         foreach (Note data in _musicPattern._noteDatas)
         {
             float xPos = 0, yPos = 0;
@@ -422,5 +426,10 @@ public class EditorController : MonoBehaviour
             _instantiatedEditorNotes.Add(_currentNote);
             _currentNote = null;
         }
+
+        EditorUI uiScript = GameObject.Find("BaseCanvas").GetComponent<EditorUI>();
+        uiScript.OnOffsetChangeByController();
+        uiScript.OnBaseBPMChangeByController();
+        OnPlayValueChanged(false);
     }
 }
