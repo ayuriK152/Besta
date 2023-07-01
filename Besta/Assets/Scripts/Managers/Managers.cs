@@ -18,7 +18,7 @@ public class Managers : MonoBehaviour
         Init();
     }
 
-    void LateUpdate()
+    void Update()
     {
         _input.OnUpdate();
     }

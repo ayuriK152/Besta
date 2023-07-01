@@ -49,14 +49,6 @@ public class EditorController : MonoBehaviour
         isPlayValueChanged = false;
         isGridScrolling = false;
 
-        // 채보 판정 타이밍과 같은 수치 설정
-        _noteTimingValue = (_musicPattern._musicSource.frequency / (_musicPattern._bpm / (double)60)) / 4;
-        _barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
-        _editorBarMaxPosition = Managers.Sound.managerAudioSource.clip.samples * 4.8f / ((float)_noteTimingValue * 16);
-        currentPlayValue = 0;
-        baseBPM = _musicPattern._bpm;
-        patternOffset = _musicPattern._songOffset;
-
         // 바인딩
         barUpperLimitPos = GameObject.Find("UpperLimit").transform.position;
         barLowerLimitPos = GameObject.Find("LowerLimit").transform.position;
@@ -64,7 +56,6 @@ public class EditorController : MonoBehaviour
         _barInstatiatePoint = GameObject.Find("Grid");
         _editorNote = Resources.Load<GameObject>("Prefabs/EditorNote");
         _editorBar = Resources.Load<GameObject>("Prefabs/EditorBar");
-        Managers.Sound.managerAudioSource.clip = _musicPattern._musicSource;
 
         // 초기 마디 생성용 Init 메서드
         Init();
@@ -100,6 +91,16 @@ public class EditorController : MonoBehaviour
 
     void Init()
     {
+        // 채보 판정 타이밍과 같은 수치 설정
+        _noteTimingValue = (_musicPattern._musicSource.frequency / (_musicPattern._bpm / (double)60)) / 4;
+        _barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
+        _editorBarMaxPosition = Managers.Sound.managerAudioSource.clip.samples * 4.8f / ((float)_noteTimingValue * 16);
+        currentPlayValue = 0;
+        baseBPM = _musicPattern._bpm;
+        patternOffset = _musicPattern._songOffset;
+        Managers.Sound.managerAudioSource.clip = _musicPattern._musicSource;
+        Managers.Sound.managerAudioSource.timeSamples = 0;
+
         for (int i = 0; i < _barAmount; i++)
         {
             _instantiatedEditorBars.Add(Instantiate(_editorBar, _barInstatiatePoint.transform));
@@ -366,6 +367,50 @@ public class EditorController : MonoBehaviour
         {
             Debug.LogError("Pattern load failed!");
             return;
+        }
+        _musicPattern = tempPatternData;
+        for (int i = _barAmount - 1; i >= 0; i--)
+        {
+            GameObject temp = _instantiatedEditorBars[i];
+            Destroy(temp);
+            _instantiatedEditorBars.RemoveAt(i);
+        }
+        _barAmount = 0;
+        Init();
+        foreach (Note data in _musicPattern._noteDatas)
+        {
+            float xPos = 0, yPos = 0;
+            switch (data._laneNumber)
+            {
+                case LaneNumber.First:
+                    xPos = -1.875f;
+                    break;
+                case LaneNumber.Second:
+                    xPos = -0.625f;
+                    break;
+                case LaneNumber.Third:
+                    xPos = 0.625f;
+                    break;
+                case LaneNumber.Fourth:
+                    xPos = 1.875f;
+                    break;
+            }
+            yPos = data._startTiming / ((float)_noteTimingValue * 16) * 4.8f;
+            _currentNote = Instantiate(_editorNote, _noteInstantiatePoint.transform);
+            _currentNote.transform.localPosition = new Vector2(xPos, yPos + 0.125f);
+            if (data._isLongNote)
+            {
+                yPos = data._endTiming / ((float)_noteTimingValue * 16) * 4.8f;
+                EditorNote tempEditorNoteData = _currentNote.GetComponent<EditorNote>();
+                tempEditorNoteData.longNotePole.SetActive(true);
+                tempEditorNoteData.longNotePole.SetActive(true);
+                tempEditorNoteData.endPoint.SetActive(true);
+                tempEditorNoteData.endPoint.transform.localPosition = new Vector2(0, yPos);
+                tempEditorNoteData.ResizePole();
+                tempEditorNoteData.longNotePole.GetComponent<BoxCollider2D>().enabled = true;
+            }
+            _currentNote.GetComponent<EditorNote>().noteData = data;
+            _currentNote = null;
         }
     }
 }
