@@ -102,6 +102,7 @@ public class EditorController : MonoBehaviour
         Managers.Sound.managerAudioSource.clip = _musicPattern._musicSource;
         Managers.Sound.managerAudioSource.timeSamples = 0;
 
+        BeatChangeAction = null;
         for (int i = 0; i < _barAmount; i++)
         {
             _instantiatedEditorBars.Add(Instantiate(_editorBar, _barInstatiatePoint.transform));
