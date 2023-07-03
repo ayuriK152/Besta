@@ -160,8 +160,8 @@ public class EditorController : MonoBehaviour
                 currentBarIndex = editorColliderParent.parent.parent.GetComponent<EditorBar>().barIndex;
             else
                 currentBarIndex = editorColliderParent.parent.GetComponent<EditorBar>().barIndex;
-
-            Note tempNoteData = new Note(tempNoteLaneNum, (int)(((currentBarIndex * 16) + (editorColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue), 0, false);
+            double tempTiming = ((currentBarIndex * 16) + (editorColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue;
+            Note tempNoteData = new Note(tempNoteLaneNum, (tempTiming - (int)tempTiming) > 0.5f ? (int)tempTiming + 1 : (int)tempTiming, 0, false);
             if (editorNoteMode == EditorNoteMode.LongNote)
             {
                 tempNoteData._isLongNote = true;
@@ -188,7 +188,8 @@ public class EditorController : MonoBehaviour
             else
                 currentBarIndex = editroColliderParent.parent.GetComponent<EditorBar>().barIndex;
 
-            _currentNote.GetComponent<EditorNote>().noteData._endTiming = (int)(((currentBarIndex * 16) + (editroColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue);
+            double tempTiming = ((currentBarIndex * 16) + (editroColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue;
+            _currentNote.GetComponent<EditorNote>().noteData._endTiming = (tempTiming - (int)tempTiming) > 0.5f ? (int)tempTiming + 1 : (int)tempTiming;
             _currentNote.GetComponent<EditorNote>().endPoint.transform.localPosition = new Vector2(0, editorCollider.position.y - _currentNote.transform.position.y);
             _currentNote.GetComponent<EditorNote>().ResizePole();
         }
@@ -208,7 +209,7 @@ public class EditorController : MonoBehaviour
                     _currentNote.GetComponent<EditorNote>().longNotePole.GetComponent<BoxCollider2D>().enabled = true;
             }
             _musicPattern._noteDatas.Add(_currentNote.GetComponent<EditorNote>().noteData);
-            Debug.Log(_currentNote.GetComponent<EditorNote>().noteData._laneNumber.ToString() + " " + _currentNote.GetComponent<EditorNote>().noteData._startTiming + " " + _currentNote.GetComponent<EditorNote>().noteData._endTiming);
+            Debug.Log($"{_currentNote.GetComponent<EditorNote>().noteData._laneNumber.ToString()} {_currentNote.GetComponent<EditorNote>().noteData._startTiming} {_currentNote.GetComponent<EditorNote>().noteData._endTiming}");
             _currentNote = null;
         }
     }
