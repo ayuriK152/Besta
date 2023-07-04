@@ -162,7 +162,7 @@ public class EditorController : MonoBehaviour
             else
                 currentBarIndex = editorColliderParent.parent.GetComponent<EditorBar>().barIndex;
             double tempTiming = ((currentBarIndex * 16) + (editorColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue;
-            Note tempNoteData = new Note(tempNoteLaneNum, (tempTiming - (int)tempTiming) > 0.5f ? (int)tempTiming + 1 : (int)tempTiming, 0, false);
+            Note tempNoteData = new Note(tempNoteLaneNum, (tempTiming - (int)tempTiming) >= 0.5f ? (int)tempTiming + 1 : (int)tempTiming, 0, false);
             if (editorNoteMode == EditorNoteMode.LongNote)
             {
                 tempNoteData._isLongNote = true;
@@ -190,7 +190,7 @@ public class EditorController : MonoBehaviour
                 currentBarIndex = editroColliderParent.parent.GetComponent<EditorBar>().barIndex;
 
             double tempTiming = ((currentBarIndex * 16) + (editroColliderParent.transform.localPosition.y / 0.3f)) * _noteTimingValue;
-            _currentNote.GetComponent<EditorNote>().noteData._endTiming = (tempTiming - (int)tempTiming) > 0.5f ? (int)tempTiming + 1 : (int)tempTiming;
+            _currentNote.GetComponent<EditorNote>().noteData._endTiming = (tempTiming - (int)tempTiming) >= 0.5f ? (int)tempTiming + 1 : (int)tempTiming;
             _currentNote.GetComponent<EditorNote>().endPoint.transform.localPosition = new Vector2(0, editorCollider.position.y - _currentNote.transform.position.y);
             _currentNote.GetComponent<EditorNote>().ResizePole();
         }
@@ -324,40 +324,88 @@ public class EditorController : MonoBehaviour
 
     void OnSettingValueChanged()
     {
+        // BPM 변경시
         if (_musicPattern._bpm != baseBPM)
         {
             _musicPattern._bpm = baseBPM;
+            double legacyTimingValue = _noteTimingValue;
+            _noteTimingValue = (_musicPattern._musicSource.frequency / (_musicPattern._bpm / (double)60)) / 4;
+            _editorBarMaxPosition = Managers.Sound.managerAudioSource.clip.samples * 4.8f / ((float)_noteTimingValue * 16);
+            if (_barAmount != (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1)
+                OnBarAmountChanged();
+
+
+            for (int i = 0; i < _instantiatedEditorNotes.Count; i++)
+            {
+                double tempIndex = _instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData._startTiming / legacyTimingValue;
+                double tempStartTiming = _noteTimingValue * (tempIndex - (int)tempIndex >= 0.5f ? (int)tempIndex + 1 : (int)tempIndex);
+                _instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData._startTiming = tempStartTiming - (int)tempStartTiming >= 0.5f ? (int)tempStartTiming + 1 : (int)tempStartTiming;
+                if (_instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData._startTiming >= _musicPattern._songLength)
+                {
+                    Destroy(_instantiatedEditorNotes[i]);
+                    _instantiatedEditorNotes[i] = null;
+                    continue;
+                }
+                if (_instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData._isLongNote)
+                {
+                    tempIndex = _instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData._endTiming / legacyTimingValue;
+                    double tempEndTiming = _noteTimingValue * (tempIndex - (int)tempIndex >= 0.5f ? (int)tempIndex + 1 : (int)tempIndex);
+                    _instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData._endTiming = tempEndTiming - (int)tempEndTiming >= 0.5f ? (int)tempEndTiming + 1 : (int)tempEndTiming;
+                    if (_instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData._endTiming >= _musicPattern._songLength)
+                    {
+                        Destroy(_instantiatedEditorNotes[i]);
+                        _instantiatedEditorNotes[i] = null;
+                    }
+                }
+            }
+
+            for (int i = 0; i < _instantiatedEditorNotes.Count; i++)
+            {
+                if (_instantiatedEditorNotes[i] == null)
+                {
+                    _instantiatedEditorNotes.RemoveAt(i);
+                    i--;
+                }
+            }
+            OnPlayValueChanged(false);
         }
+
+        // 오프셋 변경시
         if (_musicPattern._songOffset != patternOffset)
         {
             _musicPattern._songOffset = patternOffset;
             _musicPattern._songLength = _musicPattern._musicSource.samples + _musicPattern._songOffset;
-
-            if (_barAmount < ((int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1))   // 오프셋 조절에 따라 채보 길이가 늘어나는 경우
-            {
-                Debug.Log($"Bar amount increased! Before: {_barAmount}, After: {(int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1}");
-                for (int i = _barAmount; i < (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1; i++)
-                {
-                    _instantiatedEditorBars.Add(Instantiate(_editorBar, _barInstatiatePoint.transform));
-                    _instantiatedEditorBars[i].transform.localPosition = new Vector3(0, i * 4.8f, 0);
-                    _instantiatedEditorBars[i].name = _editorBar.name + " " + (i + 1);
-                    _instantiatedEditorBars[i].GetComponent<EditorBar>().barIndex = i;
-                }
-                _barAmount = _instantiatedEditorBars.Count;
-            }
-
-            else if (_barAmount > ((int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1))  // 오프셋 조절에 따라 채보 길이가 줄어드는 경우
-            {
-                Debug.Log($"Bar amount decreased! Before: {_barAmount}, After: {(int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1}");
-                for (int i = _barAmount - 1; i >= (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1; i--)
-                {
-                    GameObject temp = _instantiatedEditorBars[i];
-                    Destroy(temp);
-                    _instantiatedEditorBars.RemoveAt(i);
-                }
-                _barAmount = _instantiatedEditorBars.Count;
-            }
+            if (_barAmount != (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1)
+                OnBarAmountChanged();
             OnPlayValueChanged(false);
+        }
+    }
+
+    void OnBarAmountChanged()
+    {
+        if (_barAmount < ((int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1))   // BPM or 오프셋 조절에 따라 채보 길이가 늘어나는 경우
+        {
+            Debug.Log($"Bar amount increased! Before: {_barAmount}, After: {(int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1}");
+            for (int i = _barAmount; i < (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1; i++)
+            {
+                _instantiatedEditorBars.Add(Instantiate(_editorBar, _barInstatiatePoint.transform));
+                _instantiatedEditorBars[i].transform.localPosition = new Vector3(0, i * 4.8f, 0);
+                _instantiatedEditorBars[i].name = _editorBar.name + " " + (i + 1);
+                _instantiatedEditorBars[i].GetComponent<EditorBar>().barIndex = i;
+            }
+            _barAmount = _instantiatedEditorBars.Count;
+        }
+
+        else if (_barAmount > ((int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1))  // BPM or 오프셋 조절에 따라 채보 길이가 줄어드는 경우
+        {
+            Debug.Log($"Bar amount decreased! Before: {_barAmount}, After: {(int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1}");
+            for (int i = _barAmount - 1; i >= (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1; i--)
+            {
+                GameObject temp = _instantiatedEditorBars[i];
+                Destroy(temp);
+                _instantiatedEditorBars.RemoveAt(i);
+            }
+            _barAmount = _instantiatedEditorBars.Count;
         }
     }
 
