@@ -316,10 +316,15 @@ public class EditorController : MonoBehaviour
         _barInstatiatePoint.transform.localPosition = new Vector3(0, -currentPlayValue * _editorBarMaxPosition - (patternOffset / ((float)_noteTimingValue * 16)) * 4.8f, 0);
         if (!callByUI)
             isPlayValueChanged = true;
-        if (currentPlayValue != 1)
-            Managers.Sound.managerAudioSource.timeSamples = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples);
         else
-            Managers.Sound.managerAudioSource.timeSamples = (int)(currentPlayValue * Managers.Sound.managerAudioSource.clip.samples) - 1;
+        {
+            float tempSampleFloat = currentPlayValue * Managers.Sound.managerAudioSource.clip.samples;
+            int tempSample = tempSampleFloat - (int)tempSampleFloat > 0.5f ? (int)tempSampleFloat + 1 : (int)tempSampleFloat;
+            if (currentPlayValue != 1)
+                Managers.Sound.managerAudioSource.timeSamples = tempSample;
+            else
+                Managers.Sound.managerAudioSource.timeSamples = tempSample - 1;
+        }
     }
 
     void OnSettingValueChanged()
