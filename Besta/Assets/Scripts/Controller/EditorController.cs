@@ -468,12 +468,13 @@ public class EditorController : MonoBehaviour
             _currentNote.transform.localPosition = new Vector2(xPos, yPos + 0.125f);
             if (data._isLongNote)
             {
+                float legacyPos = yPos;
                 yPos = data._endTiming / ((float)_noteTimingValue * 16) * 4.8f;
                 EditorNote tempEditorNoteData = _currentNote.GetComponent<EditorNote>();
                 tempEditorNoteData.longNotePole.SetActive(true);
                 tempEditorNoteData.longNotePole.SetActive(true);
                 tempEditorNoteData.endPoint.SetActive(true);
-                tempEditorNoteData.endPoint.transform.localPosition = new Vector2(0, yPos);
+                tempEditorNoteData.endPoint.transform.localPosition = new Vector2(0, yPos - legacyPos);
                 tempEditorNoteData.ResizePole();
                 tempEditorNoteData.longNotePole.GetComponent<BoxCollider2D>().enabled = true;
             }
