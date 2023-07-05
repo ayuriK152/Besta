@@ -296,6 +296,7 @@ public class EditorController : MonoBehaviour
             {
                 isGridScrolling = false;
                 isPlayValueChanged = false;
+                Managers.Sound.managerAudioSource.timeSamples = Managers.Sound.managerAudioSource.clip.samples - 1;
                 return;
             }
             else
