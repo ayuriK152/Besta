@@ -165,6 +165,7 @@ public class EditorController : MonoBehaviour
             Note tempNoteData = new Note(tempNoteLaneNum, (tempTiming - (int)tempTiming) >= 0.5f ? (int)tempTiming + 1 : (int)tempTiming, 0, false);
             if (editorNoteMode == EditorNoteMode.LongNote)
             {
+                tempNoteData._endTiming = tempNoteData._startTiming;
                 tempNoteData._isLongNote = true;
                 _currentNote.GetComponent<EditorNote>().longNotePole.SetActive(true);
                 _currentNote.GetComponent<EditorNote>().endPoint.SetActive(true);
