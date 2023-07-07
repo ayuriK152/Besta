@@ -26,18 +26,25 @@ public class Datas
     public class MusicPattern
     {
         public AudioClip _musicSource;
+        public string _name;
         public int _bpm;
         public int _songOffset;
         public int _songLength;
         public List<Note> _noteDatas;
 
-        public MusicPattern()
+        public MusicPattern(string name)
         {
-            _bpm = 210;
+            _bpm = 120;
             _songOffset = 0;
-            _musicSource = Resources.Load("Sounds/Test") as AudioClip;    // 테스트용 임시 노래파일, 선택 가능하도록 변경 요망
+            _name = name;
+            _musicSource = Managers.Data.LoadMusicFile($"{Application.dataPath}/Patterns/{_name}/music.mp3");
             _songLength = _songOffset + _musicSource.samples;
             _noteDatas = new List<Note>();
+        }
+
+        public void ReloadMusic()
+        {
+            _musicSource = Managers.Data.LoadMusicFile($"{Application.dataPath}/Patterns/{_name}/music.mp3");
         }
     }
 }

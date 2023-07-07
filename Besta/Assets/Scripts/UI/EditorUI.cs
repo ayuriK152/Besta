@@ -90,6 +90,11 @@ public class EditorUI : MonoBehaviour
 
     public void OnLoadButtonClick()
     {
-        EditorController.PatternLoadAction.Invoke(EditorUtility.OpenFilePanel("Select pattern data file", "", "json"));
+        EditorController.PatternLoadAction.Invoke(EditorUtility.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Patterns", "json"));
+    }
+
+    public void OnCreateButtonClick()
+    {
+        EditorController.PatternCreateAction.Invoke();
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using static Datas;
@@ -16,6 +17,7 @@ public class EditorController : MonoBehaviour
     public static Action PatternSettingChangeAction;
     public static Action PatternSaveAction;
     public static Action<string> PatternLoadAction;
+    public static Action PatternCreateAction;
 
     public static EditorNoteMode editorNoteMode;
     public static Beat editorBeat;
@@ -46,7 +48,7 @@ public class EditorController : MonoBehaviour
     {
         editorNoteMode = EditorNoteMode.NormalNote;
         editorBeat = Beat.Eight;
-        _musicPattern = new MusicPattern();
+        _musicPattern = null;
         isPlayValueChanged = false;
         isGridScrolling = false;
 
@@ -59,7 +61,7 @@ public class EditorController : MonoBehaviour
         _editorBar = Resources.Load<GameObject>("Prefabs/EditorBar");
 
         // 초기 마디 생성용 Init 메서드
-        Init();
+        //Init();
 
         // 대리자 초기화
         NoteCreateAction = null;
@@ -76,6 +78,8 @@ public class EditorController : MonoBehaviour
         PatternSaveAction += SaveMusicPatternData;
         PatternLoadAction -= LoadMusicPatternData;
         PatternLoadAction += LoadMusicPatternData;
+        PatternCreateAction -= CreateMusicPattern;
+        PatternCreateAction += CreateMusicPattern;
     }
 
     void Update()
@@ -93,14 +97,14 @@ public class EditorController : MonoBehaviour
     void Init()
     {
         // 채보 판정 타이밍과 같은 수치 설정
+        Managers.Sound.managerAudioSource.clip = _musicPattern._musicSource;
+        Managers.Sound.managerAudioSource.timeSamples = 0;
         _noteTimingValue = (_musicPattern._musicSource.frequency / (_musicPattern._bpm / (double)60)) / 4;
         _barAmount = (int)(_musicPattern._songLength / (_noteTimingValue * 16)) + 1;
         _editorBarMaxPosition = Managers.Sound.managerAudioSource.clip.samples * 4.8f / ((float)_noteTimingValue * 16);
         currentPlayValue = 0;
         baseBPM = _musicPattern._bpm;
         patternOffset = _musicPattern._songOffset;
-        Managers.Sound.managerAudioSource.clip = _musicPattern._musicSource;
-        Managers.Sound.managerAudioSource.timeSamples = 0;
 
         BeatChangeAction = null;
         for (int i = 0; i < _barAmount; i++)
@@ -331,6 +335,16 @@ public class EditorController : MonoBehaviour
 
     void OnSettingValueChanged()
     {
+        if (_musicPattern == null)
+        {
+            Debug.LogWarning("BPM or Offset can't be change with out create or load any pattern!");
+            baseBPM = 0;
+            patternOffset = 0;
+            EditorUI uiScript = GameObject.Find("BaseCanvas").GetComponent<EditorUI>();
+            uiScript.OnOffsetChangeByController();
+            uiScript.OnBaseBPMChangeByController();
+            return;
+        }
         // BPM 변경시
         if (_musicPattern._bpm != baseBPM)
         {
@@ -418,7 +432,30 @@ public class EditorController : MonoBehaviour
 
     void SaveMusicPatternData()
     {
-        Managers.Data.SavePatternAsJson(_musicPattern, "test");
+        if (_musicPattern == null)
+        {
+            Debug.LogWarning("You tried to save pattern with out create or load any pattern!");
+            return;
+        }
+        Managers.Data.SavePatternAsJson(_musicPattern, _musicPattern._name);
+    }
+
+    void CreateMusicPattern()
+    {
+        if (_musicPattern != null )
+        {
+            // 이미 작업중이던 채보가 존재하는 경우 해당 채보를 저장할 것인지 물어본 후 저장 여부를 결정하는 기능 추가 요망
+        }
+        string musicFilePath = EditorUtility.OpenFilePanel("Choose music file", "", "mp3");
+        string[] directorys = musicFilePath.Split("/");
+        AudioClip loadedMusicFile = Managers.Data.LoadMusicFile(musicFilePath);
+        Managers.Data.CopyMusicFilesWithCheckDirectory(musicFilePath);
+        _musicPattern = new MusicPattern(directorys[directorys.Length - 1].Split(".")[0]);
+        Init();
+        EditorUI uiScript = GameObject.Find("BaseCanvas").GetComponent<EditorUI>();
+        uiScript.OnOffsetChangeByController();
+        uiScript.OnBaseBPMChangeByController();
+        Managers.Data.SavePatternAsJson(_musicPattern, _musicPattern._name);
     }
 
     void LoadMusicPatternData(string path)
@@ -430,6 +467,7 @@ public class EditorController : MonoBehaviour
             return;
         }
         _musicPattern = tempPatternData;
+        _musicPattern.ReloadMusic();
 
         // 기존 작업물 내용 삭제 과정
         for (int i = _barAmount - 1; i >= 0; i--)
