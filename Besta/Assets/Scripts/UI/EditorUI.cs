@@ -6,8 +6,6 @@ using static Define;
 
 public class EditorUI : MonoBehaviour
 {
-    static EditorUI _uiInstance;
-    static EditorUI UIInstance { get { return _uiInstance; } }
     TMP_Dropdown beatChangeDropdown;
     TMP_Dropdown noteModeChangeDropdown;
     public Slider editorPlayValueSlider;
