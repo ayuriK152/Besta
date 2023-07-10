@@ -5,7 +5,16 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/PatternEditor.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Scenes/MusicSelect.unity
+    guid: 087442d6ee4de6745b2da51d72883cc6
+  - enabled: 1
+    path: Assets/Scenes/Ingame.unity
+    guid: d63777723a062d048838e91ec1ede17d
+  - enabled: 1
+    path: Assets/Scenes/StartMenu.unity
+    guid: d24653ef58c8daf4c9807a33f0042acf
   m_configObjects: {}

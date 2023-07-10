@@ -9,8 +9,6 @@ public class TestScript : MonoBehaviour
     {
         Managers.Input.MouseAction -= MouseEventTestMethod;
         Managers.Input.MouseAction += MouseEventTestMethod;
-        Managers.Input.KeyAction -= KeyEventTestMethod;
-        Managers.Input.KeyAction += KeyEventTestMethod;
         _music = GameObject.Find("@Manager").GetComponent<AudioSource>();
     }
 
@@ -25,12 +23,5 @@ public class TestScript : MonoBehaviour
             _music.Play();
         else
             Debug.Log(_music.timeSamples);
-    }
-
-    void KeyEventTestMethod()
-    {
-        long temp = _music.timeSamples;
-        Debug.Log(temp - _previousTime);
-        _previousTime = temp;
     }
 }

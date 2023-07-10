@@ -6,7 +6,7 @@ using static Define;
 public class InputManager
 {
     public Action<MouseEvent, MousePointer> MouseAction = null;
-    public Action KeyAction = null;
+    public Action <KeyCode>KeyAction= null;
     public Action<MouseScroll> ScrollAction = null;
 
     bool _pressed = false;
@@ -15,9 +15,24 @@ public class InputManager
     public void OnUpdate()
     {
         /** 키보드 입력 관리 */
-        if (Input.anyKeyDown && KeyAction != null)
+        if (KeyAction != null)
         {
-            KeyAction.Invoke();
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                KeyAction.Invoke(KeyCode.S);
+            }
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                KeyAction.Invoke(KeyCode.D);
+            }
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                KeyAction.Invoke(KeyCode.L);
+            }
+            if (Input.GetKeyDown(KeyCode.Semicolon))
+            {
+                KeyAction.Invoke(KeyCode.Semicolon);
+            }
         }
 
         /** 마우스 입력 관리 */
