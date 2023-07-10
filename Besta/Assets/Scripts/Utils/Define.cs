@@ -44,4 +44,12 @@ public class Define
         Down,
         Up
     }
+
+    public enum Scene
+    {
+        Unknown,
+        Ingame,
+        MusicSelect,
+        StartMenu
+    }
 }
