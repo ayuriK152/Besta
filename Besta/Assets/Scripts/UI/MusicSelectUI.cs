@@ -9,6 +9,7 @@ public class MusicSelectUI : MonoBehaviour
     public void OnTempLoadClick()
     {
         Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(EditorUtility.OpenFilePanel("Choose music pattern","","json"));
+        Managers.Game.currentLoadedPattern.ReloadMusic();
         Managers.Scene.LoadScene(Define.Scene.Ingame);
     }
 }
