@@ -67,6 +67,7 @@ public class GameController : MonoBehaviour
                     fourthLaneNotes.Enqueue(currentNote);
                     break;
             }
+            // yPos 값을 계산하는 수식의 마지막 인수는 유저의 개인 설정 스크롤 속도가 되어야 한다. 임시 방편으로 보기 좋기 위해 3으로 설정해 뒀으므로 관련 수정 필요.
             float yPos = n._startTiming / barSampleAmount * 4.8f * 3;
             currentNote.transform.localPosition = new Vector2(0, yPos + 0.125f);
             if (n._isLongNote)

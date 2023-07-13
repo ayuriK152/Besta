@@ -86,6 +86,11 @@ public class EditorController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            if (!isGridScrolling && Managers.Sound.managerAudioSource.clip == null)
+            {
+                Debug.LogWarning("No music selected");
+                return;
+            }
             isGridScrolling = !isGridScrolling;
             if (!isGridScrolling)
                 Managers.Sound.managerAudioSource.Pause();
