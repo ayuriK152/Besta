@@ -10,6 +10,7 @@ public class MusicSelectUI : MonoBehaviour
     {
         Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(EditorUtility.OpenFilePanel("Choose music pattern","","json"));
         Managers.Game.currentLoadedPattern.ReloadMusic();
+        Managers.Sound.managerAudioSource.clip = Managers.Game.currentLoadedPattern._musicSource;
         Managers.Scene.LoadScene(Define.Scene.Ingame);
     }
 }

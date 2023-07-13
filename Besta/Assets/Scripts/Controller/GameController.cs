@@ -6,8 +6,15 @@ using static Define;
 
 public class GameController : MonoBehaviour
 {
+    static GameController _gameInstance;
+    static GameController GameInstance { get { return _gameInstance; } }
     GameObject gameNotePref;
+    GameObject patternObject;
     Transform[] laneTransforms;
+
+    float _barSampleAmount;
+
+    public static bool isPlaying;
 
     public Queue<GameObject> firstLaneNotes;
     public Queue<GameObject> secondLaneNotes;
@@ -16,6 +23,7 @@ public class GameController : MonoBehaviour
     void Start()
     {
         gameNotePref = Resources.Load("Prefabs/GameNote") as GameObject;
+        patternObject = GameObject.Find("Pattern");
         laneTransforms = new Transform[4];
         laneTransforms[0] = GameObject.Find("First").transform;
         laneTransforms[1] = GameObject.Find("Second").transform;
@@ -34,7 +42,10 @@ public class GameController : MonoBehaviour
 
     void Update()
     {
-        
+        if (isPlaying)
+        {
+            ScrollPattern();
+        }
     }
 
     public void PlayerKeyDown(KeyCode key)
@@ -42,9 +53,22 @@ public class GameController : MonoBehaviour
         Debug.Log(key.ToString());
     }
 
+    void ScrollPattern()
+    {
+        patternObject.transform.Translate(new Vector3(0, -Managers.Sound.managerAudioSource.clip.frequency / _barSampleAmount * 4.8f, 0) * 3 * Time.deltaTime);
+        if (isPlaying && !Managers.Sound.managerAudioSource.isPlaying)
+        {
+            if (-patternObject.transform.localPosition.y / (4.8f * 3) >= 2 && (_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * 3 * 2)) / (4.8f * 3)) >= Managers.Game.currentLoadedPattern._songOffset))
+            {
+                Managers.Sound.managerAudioSource.timeSamples = (int)(_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * 3 * 2)) / (4.8f * 3)) - Managers.Game.currentLoadedPattern._songOffset);
+                Managers.Sound.managerAudioSource.Play();
+            }
+        }
+    }
+
     public void LoadPattern()
     {
-        float barSampleAmount = (Managers.Game.currentLoadedPattern._musicSource.frequency / (Managers.Game.currentLoadedPattern._bpm / (float)60)) * 4;
+        _barSampleAmount = (Managers.Game.currentLoadedPattern._musicSource.frequency / (Managers.Game.currentLoadedPattern._bpm / (float)60)) * 4;
         foreach (Note n in Managers.Game.currentLoadedPattern._noteDatas)
         {
             GameObject currentNote = null;
@@ -68,12 +92,12 @@ public class GameController : MonoBehaviour
                     break;
             }
             // yPos 값을 계산하는 수식의 마지막 인수는 유저의 개인 설정 스크롤 속도가 되어야 한다. 임시 방편으로 보기 좋기 위해 3으로 설정해 뒀으므로 관련 수정 필요.
-            float yPos = n._startTiming / barSampleAmount * 4.8f * 3;
+            float yPos = (n._startTiming / _barSampleAmount * 4.8f * 3) + 4.8f * 3 * 2;
             currentNote.transform.localPosition = new Vector2(0, yPos + 0.125f);
             if (n._isLongNote)
             {
                 float legacyPos = yPos;
-                yPos = n._endTiming / barSampleAmount * 4.8f * 3;
+                yPos = (n._endTiming / _barSampleAmount * 4.8f * 3) + 4.8f * 3 * 2;
                 GameNote tempGameNoteData = currentNote.GetComponent<GameNote>();
                 tempGameNoteData.longNotePole.SetActive(true);
                 tempGameNoteData.longNotePole.SetActive(true);
