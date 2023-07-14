@@ -48,9 +48,24 @@ public class GameController : MonoBehaviour
         }
     }
 
+    int count = 0;
     public void PlayerKeyDown(KeyCode key)
     {
-        Debug.Log(key.ToString());
+        switch (key)
+        {
+            case KeyCode.S:
+                Debug.Log($"{key.ToString()} {Managers.Sound.managerAudioSource.timeSamples - firstLaneNotes.Dequeue().GetComponent<GameNote>().data._startTiming}");
+                break;
+            case KeyCode.D:
+                Debug.Log($"{key.ToString()} {Managers.Sound.managerAudioSource.timeSamples - secondLaneNotes.Dequeue().GetComponent<GameNote>().data._startTiming}");
+                break;
+            case KeyCode.L:
+                Debug.Log($"{key.ToString()} {Managers.Sound.managerAudioSource.timeSamples - thirdLaneNotes.Dequeue().GetComponent<GameNote>().data._startTiming}");
+                break;
+            case KeyCode.Semicolon:
+                Debug.Log($"{key.ToString()} {Managers.Sound.managerAudioSource.timeSamples - fourthLaneNotes.Dequeue().GetComponent<GameNote>().data._startTiming}");
+                break;
+        }
     }
 
     void ScrollPattern()
