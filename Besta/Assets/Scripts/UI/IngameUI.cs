@@ -9,6 +9,7 @@ public class IngameUI : MonoBehaviour
 {
     TextMeshProUGUI judgeText;
     TextMeshProUGUI timingDiffText;
+    TextMeshProUGUI comboText;
     Coroutine judgeTextCoroutine;
     Coroutine timingDiffTextCoroutine;
 
@@ -16,6 +17,7 @@ public class IngameUI : MonoBehaviour
     {
         judgeText = GameObject.Find("JudgeText").GetComponent<TextMeshProUGUI>();
         timingDiffText = GameObject.Find("TimingDiffText").GetComponent<TextMeshProUGUI>();
+        comboText = GameObject.Find("ComboText").GetComponent<TextMeshProUGUI>();
         GameController.judgeAction -= OnJudgeTriggered;
         GameController.judgeAction += OnJudgeTriggered;
     }
@@ -27,6 +29,7 @@ public class IngameUI : MonoBehaviour
 
     public void OnJudgeTriggered(Judge judge, double timingDiff)
     {
+        comboText.text = $"{Managers.Game.currentCombo}";
         switch (judge)
         {
             case Judge.Besta:

@@ -66,37 +66,40 @@ public class GameController : MonoBehaviour
 
     void CheckMissingNote()
     {
-        diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
         if (firstLaneNoteDatas.Count > 0)
         {
+            diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
             if ((firstLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
             {
-                firstLaneNoteDatas.Dequeue();
-                JudgingInput(diffUpdatesAlways / 44100);
+                JudgingInput((firstLaneNoteDatas.Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
+                Destroy(firstLaneNotes.Dequeue());
             }
         }
         if (secondLaneNoteDatas.Count > 0)
         {
+            diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
             if ((secondLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
             {
-                secondLaneNoteDatas.Dequeue();
-                JudgingInput(diffUpdatesAlways / 44100);
+                JudgingInput((secondLaneNoteDatas.Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
+                Destroy(secondLaneNotes.Dequeue());
             }
         }
         if (thirdLaneNoteDatas.Count > 0)
         {
+            diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
             if ((thirdLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
             {
-                thirdLaneNoteDatas.Dequeue();
-                JudgingInput(diffUpdatesAlways / 44100);
+                JudgingInput((thirdLaneNoteDatas.Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
+                Destroy(thirdLaneNotes.Dequeue());
             }
         }
         if (fourthLaneNoteDatas.Count > 0)
         {
+            diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
             if ((fourthLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
             {
-                fourthLaneNoteDatas.Dequeue();
-                JudgingInput(diffUpdatesAlways / 44100);
+                JudgingInput((fourthLaneNoteDatas.Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
+                Destroy(fourthLaneNotes.Dequeue());
             }
         }
     }
@@ -112,6 +115,7 @@ public class GameController : MonoBehaviour
                 if (diff > 0.2)
                     break;
                 firstLaneNoteDatas.Dequeue();
+                Destroy(firstLaneNotes.Dequeue());
                 JudgingInput(diff);
                 break;
             case KeyCode.D:
@@ -120,6 +124,7 @@ public class GameController : MonoBehaviour
                 if (diff > 0.2)
                     break;
                 secondLaneNoteDatas.Dequeue();
+                Destroy(secondLaneNotes.Dequeue());
                 JudgingInput(diff);
                 break;
             case KeyCode.L:
@@ -128,6 +133,7 @@ public class GameController : MonoBehaviour
                 if (diff > 0.2)
                     break;
                 thirdLaneNoteDatas.Dequeue();
+                Destroy(thirdLaneNotes.Dequeue());
                 JudgingInput(diff);
                 break;
             case KeyCode.Semicolon:
@@ -136,6 +142,7 @@ public class GameController : MonoBehaviour
                 if (diff > 0.2)
                     break;
                 fourthLaneNoteDatas.Dequeue();
+                Destroy(fourthLaneNotes.Dequeue());
                 JudgingInput(diff);
                 break;
         }
@@ -180,21 +187,25 @@ public class GameController : MonoBehaviour
         if (diff <= 0.04167 && diff >= -0.04167)
         {
             Debug.Log("Besta");
+            Managers.Game.currentCombo++;
             judgeAction.Invoke(Judge.Besta, diff);
         }
         else if (diff <= 0.1 && diff >= -0.1)
         {
             Debug.Log("Good");
+            Managers.Game.currentCombo++;
             judgeAction.Invoke(Judge.Good, diff);
         }
         else if (diff <= 0.16667 && diff >= -0.16667)
         {
             Debug.Log("Bad");
+            Managers.Game.currentCombo++;
             judgeAction.Invoke(Judge.Bad, diff);
         }
         else
         {
             Debug.LogWarning("Miss");
+            Managers.Game.currentCombo = 0;
             judgeAction.Invoke(Judge.Miss, diff);
         }
     }

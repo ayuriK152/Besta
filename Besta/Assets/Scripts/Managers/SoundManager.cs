@@ -15,5 +15,6 @@ public class SoundManager
         }
         managerAudioSource.loop = false;
         managerAudioSource.playOnAwake = false;
+        managerAudioSource.volume = 0.5f;
     }
 }
