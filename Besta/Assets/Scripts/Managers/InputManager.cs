@@ -6,7 +6,9 @@ using static Define;
 public class InputManager
 {
     public Action<MouseEvent, MousePointer> MouseAction = null;
-    public Action <KeyCode>KeyAction= null;
+    public Action <KeyCode>KeyDownAction= null;
+    public Action<KeyCode> KeyPressAction = null;
+    public Action<KeyCode> KeyUpAction = null;
     public Action<MouseScroll> ScrollAction = null;
 
     bool _pressed = false;
@@ -15,23 +17,63 @@ public class InputManager
     public void OnUpdate()
     {
         /** 키보드 입력 관리 */
-        if (KeyAction != null)
+        if (KeyDownAction != null)
         {
             if (Input.GetKeyDown(KeyCode.S))
             {
-                KeyAction.Invoke(KeyCode.S);
+                KeyDownAction.Invoke(KeyCode.S);
             }
             if (Input.GetKeyDown(KeyCode.D))
             {
-                KeyAction.Invoke(KeyCode.D);
+                KeyDownAction.Invoke(KeyCode.D);
             }
             if (Input.GetKeyDown(KeyCode.L))
             {
-                KeyAction.Invoke(KeyCode.L);
+                KeyDownAction.Invoke(KeyCode.L);
             }
             if (Input.GetKeyDown(KeyCode.Semicolon))
             {
-                KeyAction.Invoke(KeyCode.Semicolon);
+                KeyDownAction.Invoke(KeyCode.Semicolon);
+            }
+        }
+
+        if (KeyPressAction != null)
+        {
+            if (Input.GetKey(KeyCode.S))
+            {
+                KeyPressAction.Invoke(KeyCode.S);
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                KeyPressAction.Invoke(KeyCode.D);
+            }
+            if (Input.GetKey(KeyCode.L))
+            {
+                KeyPressAction.Invoke(KeyCode.L);
+            }
+            if (Input.GetKey(KeyCode.Semicolon))
+            {
+                KeyPressAction.Invoke(KeyCode.Semicolon);
+            }
+        }
+
+        if (KeyUpAction != null)
+        {
+            if (Input.GetKeyUp(KeyCode.S))
+            {
+                KeyUpAction.Invoke(KeyCode.S);
+            }
+            if (Input.GetKeyUp(KeyCode.D))
+            {
+                KeyUpAction.Invoke(KeyCode.D);
+            }
+            if (Input.GetKeyUp(KeyCode.L))
+            {
+                KeyUpAction.Invoke(KeyCode.L);
+            }
+            if (Input.GetKeyUp(KeyCode.Semicolon))
+            {
+                KeyUpAction.Invoke(KeyCode.Semicolon);
             }
         }
 

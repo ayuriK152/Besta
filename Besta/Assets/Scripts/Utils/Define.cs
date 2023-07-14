@@ -52,4 +52,12 @@ public class Define
         MusicSelect,
         StartMenu
     }
+
+    public enum Judge
+    {
+        Besta,
+        Good,
+        Bad,
+        Miss
+    }
 }

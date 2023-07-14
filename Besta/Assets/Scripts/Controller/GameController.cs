@@ -12,6 +12,7 @@ public class GameController : MonoBehaviour
     GameObject gameNotePref;
     GameObject patternObject;
     Transform[] laneTransforms;
+    SpriteRenderer[] lanePressEffects = new SpriteRenderer[4];
 
     float _barSampleAmount;
 
@@ -26,6 +27,8 @@ public class GameController : MonoBehaviour
     public Queue<GameNote> secondLaneNoteDatas = new Queue<GameNote>();
     public Queue<GameNote> thirdLaneNoteDatas = new Queue<GameNote>();
     public Queue<GameNote> fourthLaneNoteDatas = new Queue<GameNote>();
+
+    public static Action<Judge, double> judgeAction = null;
     void Start()
     {
         gameNotePref = Resources.Load("Prefabs/GameNote") as GameObject;
@@ -35,9 +38,18 @@ public class GameController : MonoBehaviour
         laneTransforms[1] = GameObject.Find("Second").transform;
         laneTransforms[2] = GameObject.Find("Third").transform;
         laneTransforms[3] = GameObject.Find("Fourth").transform;
+        lanePressEffects[0] = GameObject.Find("FirstLanePressEffect").GetComponent<SpriteRenderer>();
+        lanePressEffects[1] = GameObject.Find("SecondLanePressEffect").GetComponent<SpriteRenderer>();
+        lanePressEffects[2] = GameObject.Find("ThirdLanePressEffect").GetComponent<SpriteRenderer>();
+        lanePressEffects[3] = GameObject.Find("FourthLanePressEffect").GetComponent<SpriteRenderer>();
 
-        Managers.Input.KeyAction -= PlayerKeyDown;
-        Managers.Input.KeyAction += PlayerKeyDown;
+        Managers.Input.KeyDownAction -= PlayerKeyDown;
+        Managers.Input.KeyDownAction += PlayerKeyDown;
+        Managers.Input.KeyPressAction -= PlayerKeyPress;
+        Managers.Input.KeyPressAction += PlayerKeyPress;
+        Managers.Input.KeyUpAction -= PlayerKeyUp;
+        Managers.Input.KeyUpAction += PlayerKeyUp;
+
         LoadPattern();
     }
 
@@ -56,101 +68,95 @@ public class GameController : MonoBehaviour
         switch (key)
         {
             case KeyCode.S:
-                diff += firstLaneNoteDatas.Peek().data._startTiming;
-                if (true)
-                {
-                    Debug.Log($"{diff / 44100}");
-                    firstLaneNoteDatas.Dequeue();
-                    if (diff / 44100 <= 0.04167 && diff / 44100 >= -0.04167)
-                    {
-                        Debug.Log("Besta");
-                    }
-                    else if (diff / 44100 <= 0.1 && diff / 44100 >= -0.1)
-                    {
-                        Debug.Log("Good");
-                    }
-                    else if (diff / 44100 <= 0.16667 && diff / 44100 >= -0.16667)
-                    {
-                        Debug.Log("Bad");
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Miss");
-                    }
-                }
+                lanePressEffects[0].enabled = true;
+                diff = (firstLaneNoteDatas.Peek().data._startTiming + diff) / 44100;
+                if (diff > 0.2)
+                    break;
+                firstLaneNoteDatas.Dequeue();
+                JudgingInput(diff);
                 break;
             case KeyCode.D:
-                diff += secondLaneNoteDatas.Peek().data._startTiming;
-                if (true)
-                {
-                    Debug.Log($"{diff / 44100}");
-                    secondLaneNoteDatas.Dequeue();
-                    if (diff / 44100 <= 0.04167 && diff / 44100 >= -0.04167)
-                    {
-                        Debug.Log("Besta");
-                    }
-                    else if (diff / 44100 <= 0.1 && diff / 44100 >= -0.1)
-                    {
-                        Debug.Log("Good");
-                    }
-                    else if (diff / 44100 <= 0.16667 && diff / 44100 >= -0.16667)
-                    {
-                        Debug.Log("Bad");
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Miss");
-                    }
-                }
+                lanePressEffects[1].enabled = true;
+                diff = (secondLaneNoteDatas.Peek().data._startTiming + diff) / 44100;
+                if (diff > 0.2)
+                    break;
+                secondLaneNoteDatas.Dequeue();
+                JudgingInput(diff);
                 break;
             case KeyCode.L:
-                diff += thirdLaneNoteDatas.Peek().data._startTiming;
-                if (true)
-                {
-                    Debug.Log($"{diff / 44100}");
-                    thirdLaneNoteDatas.Dequeue();
-                    if (diff / 44100 <= 0.04167 && diff / 44100 >= -0.04167)
-                    {
-                        Debug.Log("Besta");
-                    }
-                    else if (diff / 44100 <= 0.1 && diff / 44100 >= -0.1)
-                    {
-                        Debug.Log("Good");
-                    }
-                    else if (diff / 44100 <= 0.16667 && diff / 44100 >= -0.16667)
-                    {
-                        Debug.Log("Bad");
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Miss");
-                    }
-                }
+                lanePressEffects[2].enabled = true;
+                diff = (thirdLaneNoteDatas.Peek().data._startTiming + diff) / 44100;
+                if (diff > 0.2)
+                    break;
+                thirdLaneNoteDatas.Dequeue();
+                JudgingInput(diff);
                 break;
             case KeyCode.Semicolon:
-                diff += fourthLaneNoteDatas.Peek().data._startTiming;
-                if (true)
-                {
-                    Debug.Log($"{diff / 44100}");
-                    fourthLaneNoteDatas.Dequeue();
-                    if (diff / 44100 <= 0.04167 && diff / 44100 >= -0.04167)
-                    {
-                        Debug.Log("Besta");
-                    }
-                    else if (diff / 44100 <= 0.1 && diff / 44100 >= -0.1)
-                    {
-                        Debug.Log("Good");
-                    }
-                    else if (diff / 44100 <= 0.16667 && diff / 44100 >= -0.16667)
-                    {
-                        Debug.Log("Bad");
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Miss");
-                    }
-                }
+                lanePressEffects[3].enabled = true;
+                diff = (fourthLaneNoteDatas.Peek().data._startTiming + diff) / 44100;
+                if (diff > 0.2)
+                    break;
+                fourthLaneNoteDatas.Dequeue();
+                JudgingInput(diff);
                 break;
+        }
+    }
+
+    public void PlayerKeyPress(KeyCode key)
+    {
+        switch (key)
+        {
+            case KeyCode.S:
+                break;
+            case KeyCode.D:
+                break;
+            case KeyCode.L:
+                break;
+            case KeyCode.Semicolon:
+                break;
+        }
+    }
+
+    public void PlayerKeyUp(KeyCode key)
+    {
+        switch (key)
+        {
+            case KeyCode.S:
+                lanePressEffects[0].enabled = false;
+                break;
+            case KeyCode.D:
+                lanePressEffects[1].enabled = false;
+                break;
+            case KeyCode.L:
+                lanePressEffects[2].enabled = false;
+                break;
+            case KeyCode.Semicolon:
+                lanePressEffects[3].enabled = false;
+                break;
+        }
+    }
+
+    void JudgingInput(double diff)
+    {
+        if (diff <= 0.04167 && diff >= -0.04167)
+        {
+            Debug.Log("Besta");
+            judgeAction.Invoke(Judge.Besta, diff);
+        }
+        else if (diff <= 0.1 && diff >= -0.1)
+        {
+            Debug.Log("Good");
+            judgeAction.Invoke(Judge.Good, diff);
+        }
+        else if (diff <= 0.16667 && diff >= -0.16667)
+        {
+            Debug.Log("Bad");
+            judgeAction.Invoke(Judge.Bad, diff);
+        }
+        else
+        {
+            Debug.LogWarning("Miss");
+            judgeAction.Invoke(Judge.Miss, diff);
         }
     }
 
@@ -224,6 +230,5 @@ public class GameController : MonoBehaviour
                     break;
             }
         }
-
     }
 }
