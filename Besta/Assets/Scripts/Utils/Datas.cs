@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -7,7 +8,7 @@ using static Define;
 public class Datas
 {
     [Serializable]
-    public class Note
+    public class Note : IComparable<Note>
     {
         public LaneNumber _laneNumber;
         public int _startTiming;
@@ -20,6 +21,16 @@ public class Datas
             _startTiming = startTiming;
             _endTiming = endTiming;
             _isLongNote = isLongNote;
+        }
+
+        public int CompareTo(Note other)
+        {
+            if (_startTiming > other._startTiming)
+                return 1;
+            else if (_startTiming < other._startTiming)
+                return -1;
+            else
+                return 0;
         }
     }
 

@@ -442,6 +442,7 @@ public class EditorController : MonoBehaviour
             Debug.LogWarning("You tried to save pattern with out create or load any pattern!");
             return;
         }
+        _musicPattern._noteDatas.Sort();
         Managers.Data.SavePatternAsJson(_musicPattern, _musicPattern._name);
     }
 

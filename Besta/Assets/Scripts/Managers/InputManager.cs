@@ -19,7 +19,6 @@ public class InputManager
         {
             if (Input.GetKeyDown(KeyCode.S))
             {
-                Debug.Log("asdf");
                 KeyAction.Invoke(KeyCode.S);
             }
             if (Input.GetKeyDown(KeyCode.D))
