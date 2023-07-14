@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,10 +17,15 @@ public class GameController : MonoBehaviour
 
     public static bool isPlaying;
 
-    public Queue<GameObject> firstLaneNotes;
-    public Queue<GameObject> secondLaneNotes;
-    public Queue<GameObject> thirdLaneNotes;
-    public Queue<GameObject> fourthLaneNotes;
+    public Queue<GameObject> firstLaneNotes = new Queue<GameObject>();
+    public Queue<GameObject> secondLaneNotes = new Queue<GameObject>();
+    public Queue<GameObject> thirdLaneNotes = new Queue<GameObject>();
+    public Queue<GameObject> fourthLaneNotes = new Queue<GameObject>();
+
+    public Queue<GameNote> firstLaneNoteDatas = new Queue<GameNote>();
+    public Queue<GameNote> secondLaneNoteDatas = new Queue<GameNote>();
+    public Queue<GameNote> thirdLaneNoteDatas = new Queue<GameNote>();
+    public Queue<GameNote> fourthLaneNoteDatas = new Queue<GameNote>();
     void Start()
     {
         gameNotePref = Resources.Load("Prefabs/GameNote") as GameObject;
@@ -29,11 +35,6 @@ public class GameController : MonoBehaviour
         laneTransforms[1] = GameObject.Find("Second").transform;
         laneTransforms[2] = GameObject.Find("Third").transform;
         laneTransforms[3] = GameObject.Find("Fourth").transform;
-
-        firstLaneNotes = new Queue<GameObject>();
-        secondLaneNotes = new Queue<GameObject>();
-        thirdLaneNotes = new Queue<GameObject>();
-        fourthLaneNotes = new Queue<GameObject>();
 
         Managers.Input.KeyAction -= PlayerKeyDown;
         Managers.Input.KeyAction += PlayerKeyDown;
@@ -48,22 +49,107 @@ public class GameController : MonoBehaviour
         }
     }
 
-    int count = 0;
+    double diff;
     public void PlayerKeyDown(KeyCode key)
     {
+        diff = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
         switch (key)
         {
             case KeyCode.S:
-                Debug.Log($"{key.ToString()} {Managers.Sound.managerAudioSource.timeSamples - firstLaneNotes.Dequeue().GetComponent<GameNote>().data._startTiming}");
+                diff += firstLaneNoteDatas.Peek().data._startTiming;
+                if (true)
+                {
+                    Debug.Log($"{diff / 44100}");
+                    firstLaneNoteDatas.Dequeue();
+                    if (diff / 44100 <= 0.04167 && diff / 44100 >= -0.04167)
+                    {
+                        Debug.Log("Besta");
+                    }
+                    else if (diff / 44100 <= 0.1 && diff / 44100 >= -0.1)
+                    {
+                        Debug.Log("Good");
+                    }
+                    else if (diff / 44100 <= 0.16667 && diff / 44100 >= -0.16667)
+                    {
+                        Debug.Log("Bad");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Miss");
+                    }
+                }
                 break;
             case KeyCode.D:
-                Debug.Log($"{key.ToString()} {Managers.Sound.managerAudioSource.timeSamples - secondLaneNotes.Dequeue().GetComponent<GameNote>().data._startTiming}");
+                diff += secondLaneNoteDatas.Peek().data._startTiming;
+                if (true)
+                {
+                    Debug.Log($"{diff / 44100}");
+                    secondLaneNoteDatas.Dequeue();
+                    if (diff / 44100 <= 0.04167 && diff / 44100 >= -0.04167)
+                    {
+                        Debug.Log("Besta");
+                    }
+                    else if (diff / 44100 <= 0.1 && diff / 44100 >= -0.1)
+                    {
+                        Debug.Log("Good");
+                    }
+                    else if (diff / 44100 <= 0.16667 && diff / 44100 >= -0.16667)
+                    {
+                        Debug.Log("Bad");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Miss");
+                    }
+                }
                 break;
             case KeyCode.L:
-                Debug.Log($"{key.ToString()} {Managers.Sound.managerAudioSource.timeSamples - thirdLaneNotes.Dequeue().GetComponent<GameNote>().data._startTiming}");
+                diff += thirdLaneNoteDatas.Peek().data._startTiming;
+                if (true)
+                {
+                    Debug.Log($"{diff / 44100}");
+                    thirdLaneNoteDatas.Dequeue();
+                    if (diff / 44100 <= 0.04167 && diff / 44100 >= -0.04167)
+                    {
+                        Debug.Log("Besta");
+                    }
+                    else if (diff / 44100 <= 0.1 && diff / 44100 >= -0.1)
+                    {
+                        Debug.Log("Good");
+                    }
+                    else if (diff / 44100 <= 0.16667 && diff / 44100 >= -0.16667)
+                    {
+                        Debug.Log("Bad");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Miss");
+                    }
+                }
                 break;
             case KeyCode.Semicolon:
-                Debug.Log($"{key.ToString()} {Managers.Sound.managerAudioSource.timeSamples - fourthLaneNotes.Dequeue().GetComponent<GameNote>().data._startTiming}");
+                diff += fourthLaneNoteDatas.Peek().data._startTiming;
+                if (true)
+                {
+                    Debug.Log($"{diff / 44100}");
+                    fourthLaneNoteDatas.Dequeue();
+                    if (diff / 44100 <= 0.04167 && diff / 44100 >= -0.04167)
+                    {
+                        Debug.Log("Besta");
+                    }
+                    else if (diff / 44100 <= 0.1 && diff / 44100 >= -0.1)
+                    {
+                        Debug.Log("Good");
+                    }
+                    else if (diff / 44100 <= 0.16667 && diff / 44100 >= -0.16667)
+                    {
+                        Debug.Log("Bad");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Miss");
+                    }
+                }
                 break;
         }
     }
@@ -91,19 +177,15 @@ public class GameController : MonoBehaviour
             {
                 case LaneNumber.First:
                     currentNote = Instantiate(gameNotePref, laneTransforms[0]);
-                    firstLaneNotes.Enqueue(currentNote);
                     break;
                 case LaneNumber.Second:
                     currentNote = Instantiate(gameNotePref, laneTransforms[1]);
-                    secondLaneNotes.Enqueue(currentNote);
                     break;
                 case LaneNumber.Third:
                     currentNote = Instantiate(gameNotePref, laneTransforms[2]);
-                    thirdLaneNotes.Enqueue(currentNote);
                     break;
                 case LaneNumber.Fourth:
                     currentNote = Instantiate(gameNotePref, laneTransforms[3]);
-                    fourthLaneNotes.Enqueue(currentNote);
                     break;
             }
             // yPos 값을 계산하는 수식의 마지막 인수는 유저의 개인 설정 스크롤 속도가 되어야 한다. 임시 방편으로 보기 좋기 위해 3으로 설정해 뒀으므로 관련 수정 필요.
@@ -121,6 +203,27 @@ public class GameController : MonoBehaviour
                 tempGameNoteData.ResizePole();
             }
             currentNote.GetComponent<GameNote>().data = n;
+
+            switch (n._laneNumber)  
+            {
+                case LaneNumber.First:
+                    firstLaneNotes.Enqueue(currentNote);
+                    firstLaneNoteDatas.Enqueue(currentNote.GetComponent<GameNote>());
+                    break;
+                case LaneNumber.Second:
+                    secondLaneNotes.Enqueue(currentNote);
+                    secondLaneNoteDatas.Enqueue(currentNote.GetComponent<GameNote>());
+                    break;
+                case LaneNumber.Third:
+                    thirdLaneNotes.Enqueue(currentNote);
+                    thirdLaneNoteDatas.Enqueue(currentNote.GetComponent<GameNote>());
+                    break;
+                case LaneNumber.Fourth:
+                    fourthLaneNotes.Enqueue(currentNote);
+                    fourthLaneNoteDatas.Enqueue(currentNote.GetComponent<GameNote>());
+                    break;
+            }
         }
+
     }
 }
