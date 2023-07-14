@@ -15,6 +15,8 @@ public class GameController : MonoBehaviour
     SpriteRenderer[] lanePressEffects = new SpriteRenderer[4];
 
     float _barSampleAmount;
+    double diff;
+    double diffUpdatesAlways;
 
     public static bool isPlaying;
 
@@ -58,10 +60,47 @@ public class GameController : MonoBehaviour
         if (isPlaying)
         {
             ScrollPattern();
+            CheckMissingNote();
         }
     }
 
-    double diff;
+    void CheckMissingNote()
+    {
+        diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
+        if (firstLaneNoteDatas.Count > 0)
+        {
+            if ((firstLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
+            {
+                firstLaneNoteDatas.Dequeue();
+                JudgingInput(diffUpdatesAlways / 44100);
+            }
+        }
+        if (secondLaneNoteDatas.Count > 0)
+        {
+            if ((secondLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
+            {
+                secondLaneNoteDatas.Dequeue();
+                JudgingInput(diffUpdatesAlways / 44100);
+            }
+        }
+        if (thirdLaneNoteDatas.Count > 0)
+        {
+            if ((thirdLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
+            {
+                thirdLaneNoteDatas.Dequeue();
+                JudgingInput(diffUpdatesAlways / 44100);
+            }
+        }
+        if (fourthLaneNoteDatas.Count > 0)
+        {
+            if ((fourthLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
+            {
+                fourthLaneNoteDatas.Dequeue();
+                JudgingInput(diffUpdatesAlways / 44100);
+            }
+        }
+    }
+
     public void PlayerKeyDown(KeyCode key)
     {
         diff = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
