@@ -1,6 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 using static Datas;
 using static Define;
@@ -17,17 +17,12 @@ public class GameController : MonoBehaviour
     double diffUpdatesAlways;
     float[] holdingSampleAmout = new float[4];
 
+    int gainedScore = 0, perfectScore = 0;
+
     public static bool isPlaying;
 
-    public Queue<GameObject> firstLaneNotes = new Queue<GameObject>();
-    public Queue<GameObject> secondLaneNotes = new Queue<GameObject>();
-    public Queue<GameObject> thirdLaneNotes = new Queue<GameObject>();
-    public Queue<GameObject> fourthLaneNotes = new Queue<GameObject>();
-
-    public Queue<GameNote> firstLaneNoteDatas = new Queue<GameNote>();
-    public Queue<GameNote> secondLaneNoteDatas = new Queue<GameNote>();
-    public Queue<GameNote> thirdLaneNoteDatas = new Queue<GameNote>();
-    public Queue<GameNote> fourthLaneNoteDatas = new Queue<GameNote>();
+    public Queue<GameObject>[] laneNotes = new Queue<GameObject>[4];
+    public Queue<GameNote>[] laneNoteDatas = new Queue<GameNote>[4];
 
     public static Action<Judge, double> judgeAction = null;
     void Start()
@@ -42,6 +37,11 @@ public class GameController : MonoBehaviour
         lanePressEffects[1] = GameObject.Find("SecondLanePressEffect").GetComponent<SpriteRenderer>();
         lanePressEffects[2] = GameObject.Find("ThirdLanePressEffect").GetComponent<SpriteRenderer>();
         lanePressEffects[3] = GameObject.Find("FourthLanePressEffect").GetComponent<SpriteRenderer>();
+        for (int i = 0; i < 4; i++)
+        {
+            laneNotes[i] = new Queue<GameObject>();
+            laneNoteDatas[i] = new Queue<GameNote>();
+        }
         Array.Fill(holdingSampleAmout, 0);
 
         Managers.Input.KeyDownAction -= PlayerKeyDown;
@@ -65,61 +65,29 @@ public class GameController : MonoBehaviour
 
     void CheckMissingNote()
     {
-        if (firstLaneNoteDatas.Count > 0)
+        if (laneNoteDatas[0].Count > 0)
+            CheckMissingNote((int)LaneNumber.First);
+        if (laneNoteDatas[1].Count > 0)
+            CheckMissingNote((int)LaneNumber.Second);
+        if (laneNoteDatas[2].Count > 0)
+            CheckMissingNote((int)LaneNumber.Third);
+        if (laneNoteDatas[3].Count > 0)
+            CheckMissingNote((int)LaneNumber.Fourth);
+    }
+
+    void CheckMissingNote(int lane)
+    {
+        lane -= 1;
+        diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
+        if (!laneNoteDatas[lane].Peek().data._isLongNote && (laneNoteDatas[lane].Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
         {
-            diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
-            if (!firstLaneNoteDatas.Peek().data._isLongNote && (firstLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
-            {
-                Destroy(firstLaneNotes.Dequeue());
-                JudgingInput((firstLaneNoteDatas.Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
-            }
-            else if (firstLaneNoteDatas.Peek().data._isLongNote && (firstLaneNoteDatas.Peek().data._endTiming + diffUpdatesAlways) / 44100 < -0.3)
-            {
-                Destroy(firstLaneNotes.Dequeue());
-                JudgingInput((firstLaneNoteDatas.Dequeue().data._endTiming + diffUpdatesAlways) / 44100);
-            }
+            Destroy(laneNotes[lane].Dequeue());
+            JudgingInput((laneNoteDatas[lane].Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
         }
-        if (secondLaneNoteDatas.Count > 0)
+        else if (laneNoteDatas[lane].Peek().data._isLongNote && (laneNoteDatas[lane].Peek().data._endTiming + diffUpdatesAlways) / 44100 < -0.3)
         {
-            diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
-            if (!secondLaneNoteDatas.Peek().data._isLongNote && (secondLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
-            {
-                Destroy(secondLaneNotes.Dequeue());
-                JudgingInput((secondLaneNoteDatas.Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
-            }
-            else if (secondLaneNoteDatas.Peek().data._isLongNote && (secondLaneNoteDatas.Peek().data._endTiming + diffUpdatesAlways) / 44100 < -0.3)
-            {
-                Destroy(secondLaneNotes.Dequeue());
-                JudgingInput((secondLaneNoteDatas.Dequeue().data._endTiming + diffUpdatesAlways) / 44100);
-            }
-        }
-        if (thirdLaneNoteDatas.Count > 0)
-        {
-            diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
-            if (!thirdLaneNoteDatas.Peek().data._isLongNote && (thirdLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
-            {
-                Destroy(thirdLaneNotes.Dequeue());
-                JudgingInput((thirdLaneNoteDatas.Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
-            }
-            else if (thirdLaneNoteDatas.Peek().data._isLongNote && (thirdLaneNoteDatas.Peek().data._endTiming + diffUpdatesAlways) / 44100 < -0.3)
-            {
-                Destroy(thirdLaneNotes.Dequeue());
-                JudgingInput((thirdLaneNoteDatas.Dequeue().data._endTiming + diffUpdatesAlways) / 44100);
-            }
-        }
-        if (fourthLaneNoteDatas.Count > 0)
-        {
-            diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
-            if (!fourthLaneNoteDatas.Peek().data._isLongNote && (fourthLaneNoteDatas.Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
-            {
-                Destroy(fourthLaneNotes.Dequeue());
-                JudgingInput((fourthLaneNoteDatas.Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
-            }
-            else if (fourthLaneNoteDatas.Peek().data._isLongNote && (fourthLaneNoteDatas.Peek().data._endTiming + diffUpdatesAlways) / 44100 < -0.3)
-            {
-                Destroy(fourthLaneNotes.Dequeue());
-                JudgingInput((fourthLaneNoteDatas.Dequeue().data._endTiming + diffUpdatesAlways) / 44100);
-            }
+            Destroy(laneNotes[lane].Dequeue());
+            JudgingInput((laneNoteDatas[lane].Dequeue().data._endTiming + diffUpdatesAlways) / 44100);
         }
     }
 
@@ -129,74 +97,38 @@ public class GameController : MonoBehaviour
         switch (key)
         {
             case KeyCode.S:
-                lanePressEffects[0].enabled = true;
-                diff = (firstLaneNoteDatas.Peek().data._startTiming + diff) / 44100;
-                if (diff > 0.2)
-                    break;
-                if (!firstLaneNoteDatas.Peek().data._isLongNote)
-                {
-                    firstLaneNoteDatas.Dequeue();
-                    Destroy(firstLaneNotes.Dequeue());
-                }
-                else
-                {
-                    holdingSampleAmout[0] = fourthLaneNoteDatas.Peek().data._startTiming;
-                    holdingSampleAmout[0] += _barSampleAmount * 0.25f;
-                }
-                JudgingInput(diff);
+                NoteProcessKeyDown((int)LaneNumber.First);
                 break;
             case KeyCode.D:
-                lanePressEffects[1].enabled = true;
-                diff = (secondLaneNoteDatas.Peek().data._startTiming + diff) / 44100;
-                if (diff > 0.2)
-                    break;
-                if (!secondLaneNoteDatas.Peek().data._isLongNote)
-                {
-                    secondLaneNoteDatas.Dequeue();
-                    Destroy(secondLaneNotes.Dequeue());
-                }
-                else
-                {
-                    holdingSampleAmout[1] = fourthLaneNoteDatas.Peek().data._startTiming;
-                    holdingSampleAmout[1] += _barSampleAmount * 0.25f;
-                }
-                JudgingInput(diff);
+                NoteProcessKeyDown((int)LaneNumber.Second);
                 break;
             case KeyCode.L:
-                lanePressEffects[2].enabled = true;
-                diff = (thirdLaneNoteDatas.Peek().data._startTiming + diff) / 44100;
-                if (diff > 0.2)
-                    break;
-                if (!thirdLaneNoteDatas.Peek().data._isLongNote)
-                {
-                    thirdLaneNoteDatas.Dequeue();
-                    Destroy(thirdLaneNotes.Dequeue());
-                }
-                else
-                {
-                    holdingSampleAmout[2] = fourthLaneNoteDatas.Peek().data._startTiming;
-                    holdingSampleAmout[2] += _barSampleAmount * 0.25f;
-                }
-                JudgingInput(diff);
+                NoteProcessKeyDown((int)LaneNumber.Third);
                 break;
             case KeyCode.Semicolon:
-                lanePressEffects[3].enabled = true;
-                diff = (fourthLaneNoteDatas.Peek().data._startTiming + diff) / 44100;
-                if (diff > 0.2)
-                    break;
-                if (!fourthLaneNoteDatas.Peek().data._isLongNote)
-                {
-                    fourthLaneNoteDatas.Dequeue();
-                    Destroy(fourthLaneNotes.Dequeue());
-                }
-                else
-                {
-                    holdingSampleAmout[3] = fourthLaneNoteDatas.Peek().data._startTiming;
-                    holdingSampleAmout[3] += _barSampleAmount * 0.25f;
-                }
-                JudgingInput(diff);
+                NoteProcessKeyDown((int)LaneNumber.Fourth);
                 break;
         }
+    }
+
+    void NoteProcessKeyDown(int lane)
+    {
+        lane -= 1;
+        lanePressEffects[lane].enabled = true;
+        diff = (laneNoteDatas[lane].Peek().data._startTiming + diff) / 44100;
+        if (diff > 0.2)
+            return;
+        if (!laneNoteDatas[lane].Peek().data._isLongNote)
+        {
+            laneNoteDatas[lane].Dequeue();
+            Destroy(laneNotes[lane].Dequeue());
+        }
+        else
+        {
+            holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data._startTiming;
+            holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
+        }
+        JudgingInput(diff);
     }
 
     public void PlayerKeyPress(KeyCode key)
@@ -204,81 +136,39 @@ public class GameController : MonoBehaviour
         switch (key)
         {
             case KeyCode.S:
-                if (holdingSampleAmout[0] > 0)
-                {
-                    if ((holdingSampleAmout[0] - (int)holdingSampleAmout[0] > 0.5f ? (int)holdingSampleAmout[0] + 1 : holdingSampleAmout[0]) <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
-                    {
-                        holdingSampleAmout[0] += _barSampleAmount * 0.25f;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                    }
-                    else if (firstLaneNoteDatas.Peek().data._endTiming <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
-                    {
-                        holdingSampleAmout[0] = 0;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                        firstLaneNoteDatas.Dequeue();
-                        Destroy(firstLaneNotes.Dequeue());
-                    }
-                }
+                LongNoteProcessKeyPress((int)LaneNumber.First);
                 break;
             case KeyCode.D:
-                if (holdingSampleAmout[1] > 0)
-                {
-                    if ((holdingSampleAmout[1] - (int)holdingSampleAmout[1] > 0.5f ? (int)holdingSampleAmout[1] + 1 : holdingSampleAmout[1]) <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
-                    {
-                        holdingSampleAmout[1] += _barSampleAmount * 0.25f;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                    }
-                    else if (secondLaneNoteDatas.Peek().data._endTiming <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
-                    {
-                        holdingSampleAmout[1] = 0;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                        secondLaneNoteDatas.Dequeue();
-                        Destroy(secondLaneNotes.Dequeue());
-                    }
-                }
+                LongNoteProcessKeyPress((int)LaneNumber.Second);
                 break;
             case KeyCode.L:
-                if (holdingSampleAmout[2] > 0)
-                {
-                    if ((holdingSampleAmout[2] - (int)holdingSampleAmout[2] > 0.5f ? (int)holdingSampleAmout[2] + 1 : holdingSampleAmout[2]) <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
-                    {
-                        holdingSampleAmout[2] += _barSampleAmount * 0.25f;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                    }
-                    else if (thirdLaneNoteDatas.Peek().data._endTiming <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
-                    {
-                        holdingSampleAmout[2] = 0;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                        thirdLaneNoteDatas.Dequeue();
-                        Destroy(thirdLaneNotes.Dequeue());
-                    }
-                }
+                LongNoteProcessKeyPress((int)LaneNumber.Third);
                 break;
             case KeyCode.Semicolon:
-                if (holdingSampleAmout[3] > 0)
-                {
-                    if ((holdingSampleAmout[3] - (int)holdingSampleAmout[3] > 0.5f ? (int)holdingSampleAmout[3] + 1 : holdingSampleAmout[3]) <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
-                    {
-                        holdingSampleAmout[3] += _barSampleAmount * 0.25f;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                    }
-                    else if (fourthLaneNoteDatas.Peek().data._endTiming <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
-                    {
-                        holdingSampleAmout[3] = 0;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                        fourthLaneNoteDatas.Dequeue();
-                        Destroy(fourthLaneNotes.Dequeue());
-                    }
-                }
+                LongNoteProcessKeyPress((int)LaneNumber.Fourth);
                 break;
+        }
+    }
+
+    void LongNoteProcessKeyPress(int lane)
+    {
+        lane -= 1;
+        if (holdingSampleAmout[lane] > 0)
+        {
+            if ((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
+            {
+                holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
+                Managers.Game.currentCombo++;
+                judgeAction.Invoke(Judge.None, diff);
+            }
+            else if (laneNoteDatas[lane].Peek().data._endTiming <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
+            {
+                holdingSampleAmout[lane] = 0;
+                Managers.Game.currentCombo++;
+                judgeAction.Invoke(Judge.None, diff);
+                laneNoteDatas[lane].Dequeue();
+                Destroy(laneNotes[lane].Dequeue());
+            }
         }
     }
 
@@ -287,99 +177,75 @@ public class GameController : MonoBehaviour
         switch (key)
         {
             case KeyCode.S:
-                lanePressEffects[0].enabled = false;
-                if (holdingSampleAmout[0] > 0)
-                {
-                    double tempDiff = (double)(firstLaneNoteDatas.Peek().data._endTiming - (Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)) / 44100;
-                    if (tempDiff <= 0.2 && tempDiff >= -0.2)
-                    {
-                        holdingSampleAmout[0] = 0;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                        firstLaneNoteDatas.Dequeue();
-                        Destroy(firstLaneNotes.Dequeue());
-                    }
-                }
+                CheckLongNoteKeyUp((int)LaneNumber.First);
                 break;
             case KeyCode.D:
-                lanePressEffects[1].enabled = false;
-                if (holdingSampleAmout[1] > 0)
-                {
-                    double tempDiff = (double)(secondLaneNoteDatas.Peek().data._endTiming - (Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)) / 44100;
-                    if (tempDiff <= 0.2 && tempDiff >= -0.2)
-                    {
-                        holdingSampleAmout[1] = 0;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                        secondLaneNoteDatas.Dequeue();
-                        Destroy(secondLaneNotes.Dequeue());
-                    }
-                }
+                CheckLongNoteKeyUp((int)LaneNumber.Second);
                 break;
             case KeyCode.L:
-                lanePressEffects[2].enabled = false;
-                if (holdingSampleAmout[2] > 0)
-                {
-                    double tempDiff = (double)(thirdLaneNoteDatas.Peek().data._endTiming - (Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)) / 44100;
-                    if (tempDiff <= 0.2 && tempDiff >= -0.2)
-                    {
-                        holdingSampleAmout[2] = 0;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                        thirdLaneNoteDatas.Dequeue();
-                        Destroy(thirdLaneNotes.Dequeue());
-                    }
-                }
+                CheckLongNoteKeyUp((int)LaneNumber.Third);
                 break;
             case KeyCode.Semicolon:
-                lanePressEffects[3].enabled = false;
-                if (holdingSampleAmout[3] > 0)
-                {
-                    double tempDiff = (double)(fourthLaneNoteDatas.Peek().data._endTiming - (Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)) / 44100;
-                    if (tempDiff <= 0.2 && tempDiff >= -0.2)
-                    {
-                        holdingSampleAmout[3] = 0;
-                        Managers.Game.currentCombo++;
-                        judgeAction.Invoke(Judge.None, diff);
-                        fourthLaneNoteDatas.Dequeue();
-                        Destroy(fourthLaneNotes.Dequeue());
-                    }
-                }
+                CheckLongNoteKeyUp((int)LaneNumber.Fourth);
                 break;
+        }
+    }
+
+    void CheckLongNoteKeyUp(int lane)
+    {
+        lane -= 1;
+        lanePressEffects[lane].enabled = false;
+        if (holdingSampleAmout[lane] > 0)
+        {
+            double tempDiff = (double)(laneNoteDatas[lane].Peek().data._endTiming - (Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)) / 44100;
+            if (tempDiff <= 0.16667 && tempDiff >= -0.16667)
+            {
+                holdingSampleAmout[lane] = 0;
+                Managers.Game.currentCombo++;
+                judgeAction.Invoke(Judge.None, diff);
+                laneNoteDatas[lane].Dequeue();
+                Destroy(laneNotes[lane].Dequeue());
+            }
         }
     }
 
     void JudgingInput(double diff)
     {
+        perfectScore += 3;
         if (diff <= 0.04167 && diff >= -0.04167)
         {
             Debug.Log("Besta");
+            gainedScore += 3;
             Managers.Game.currentCombo++;
             judgeAction.Invoke(Judge.Besta, diff);
         }
         else if (diff <= 0.1 && diff >= -0.1)
         {
             Debug.Log("Good");
+            gainedScore += 2;
             Managers.Game.currentCombo++;
             judgeAction.Invoke(Judge.Good, diff);
         }
         else if (diff <= 0.16667 && diff >= -0.16667)
         {
             Debug.Log("Bad");
+            gainedScore += 1;
             Managers.Game.currentCombo++;
             judgeAction.Invoke(Judge.Bad, diff);
         }
         else
         {
             Debug.LogWarning("Miss");
+            gainedScore += 0;
             Managers.Game.currentCombo = 0;
             judgeAction.Invoke(Judge.Miss, diff);
         }
+        Debug.Log((float)gainedScore / perfectScore);
     }
 
     void ScrollPattern()
     {
-        patternObject.transform.Translate(new Vector3(0, -Managers.Sound.managerAudioSource.clip.frequency / _barSampleAmount * 4.8f, 0) * 3 * Time.deltaTime);
+        patternObject.transform.Translate(new UnityEngine.Vector3(0, -Managers.Sound.managerAudioSource.clip.frequency / _barSampleAmount * 4.8f, 0) * 3 * Time.deltaTime);
         if (isPlaying && !Managers.Sound.managerAudioSource.isPlaying)
         {
             if (-patternObject.transform.localPosition.y / (4.8f * 3) >= 2 && (_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * 3 * 2)) / (4.8f * 3)) >= Managers.Game.currentLoadedPattern._songOffset))
@@ -413,7 +279,7 @@ public class GameController : MonoBehaviour
             }
             // yPos 값을 계산하는 수식의 마지막 인수는 유저의 개인 설정 스크롤 속도가 되어야 한다. 임시 방편으로 보기 좋기 위해 3으로 설정해 뒀으므로 관련 수정 필요.
             float yPos = (n._startTiming / _barSampleAmount * 4.8f * 3) + 4.8f * 3 * 2;
-            currentNote.transform.localPosition = new Vector2(0, yPos + 0.125f);
+            currentNote.transform.localPosition = new UnityEngine.Vector2(0, yPos + 0.125f);
             if (n._isLongNote)
             {
                 float legacyPos = yPos;
@@ -422,7 +288,7 @@ public class GameController : MonoBehaviour
                 tempGameNoteData.longNotePole.SetActive(true);
                 tempGameNoteData.longNotePole.SetActive(true);
                 tempGameNoteData.endPoint.SetActive(true);
-                tempGameNoteData.endPoint.transform.localPosition = new Vector2(0, yPos - legacyPos);
+                tempGameNoteData.endPoint.transform.localPosition = new UnityEngine.Vector2(0, yPos - legacyPos);
                 tempGameNoteData.ResizePole();
             }
             currentNote.GetComponent<GameNote>().data = n;
@@ -430,20 +296,20 @@ public class GameController : MonoBehaviour
             switch (n._laneNumber)  
             {
                 case LaneNumber.First:
-                    firstLaneNotes.Enqueue(currentNote);
-                    firstLaneNoteDatas.Enqueue(currentNote.GetComponent<GameNote>());
+                    laneNotes[0].Enqueue(currentNote);
+                    laneNoteDatas[0].Enqueue(currentNote.GetComponent<GameNote>());
                     break;
                 case LaneNumber.Second:
-                    secondLaneNotes.Enqueue(currentNote);
-                    secondLaneNoteDatas.Enqueue(currentNote.GetComponent<GameNote>());
+                    laneNotes[1].Enqueue(currentNote);
+                    laneNoteDatas[1].Enqueue(currentNote.GetComponent<GameNote>());
                     break;
                 case LaneNumber.Third:
-                    thirdLaneNotes.Enqueue(currentNote);
-                    thirdLaneNoteDatas.Enqueue(currentNote.GetComponent<GameNote>());
+                    laneNotes[2].Enqueue(currentNote);
+                    laneNoteDatas[2].Enqueue(currentNote.GetComponent<GameNote>());
                     break;
                 case LaneNumber.Fourth:
-                    fourthLaneNotes.Enqueue(currentNote);
-                    fourthLaneNoteDatas.Enqueue(currentNote.GetComponent<GameNote>());
+                    laneNotes[3].Enqueue(currentNote);
+                    laneNoteDatas[3].Enqueue(currentNote.GetComponent<GameNote>());
                     break;
             }
         }
