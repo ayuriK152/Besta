@@ -58,6 +58,7 @@ public class Define
         Besta,
         Good,
         Bad,
-        Miss
+        Miss,
+        None
     }
 }

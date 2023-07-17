@@ -8,8 +8,6 @@ using static Define;
 
 public class EditorController : MonoBehaviour
 {
-    static EditorController _editorInstance;
-    static EditorController EditorInstance { get { return _editorInstance; } }
 
     public Action<int, int, int, bool> NoteCreateAction;
     public static Action<Beat> BeatChangeAction;
