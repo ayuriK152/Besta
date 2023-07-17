@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using UnityEngine;
 using static Datas;
 using static Define;
@@ -245,7 +244,7 @@ public class GameController : MonoBehaviour
 
     void ScrollPattern()
     {
-        patternObject.transform.Translate(new UnityEngine.Vector3(0, -Managers.Sound.managerAudioSource.clip.frequency / _barSampleAmount * 4.8f, 0) * 3 * Time.deltaTime);
+        patternObject.transform.Translate(new Vector3(0, -Managers.Sound.managerAudioSource.clip.frequency / _barSampleAmount * 4.8f, 0) * 3 * Time.deltaTime);
         if (isPlaying && !Managers.Sound.managerAudioSource.isPlaying)
         {
             if (-patternObject.transform.localPosition.y / (4.8f * 3) >= 2 && (_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * 3 * 2)) / (4.8f * 3)) >= Managers.Game.currentLoadedPattern._songOffset))
@@ -279,7 +278,7 @@ public class GameController : MonoBehaviour
             }
             // yPos 값을 계산하는 수식의 마지막 인수는 유저의 개인 설정 스크롤 속도가 되어야 한다. 임시 방편으로 보기 좋기 위해 3으로 설정해 뒀으므로 관련 수정 필요.
             float yPos = (n._startTiming / _barSampleAmount * 4.8f * 3) + 4.8f * 3 * 2;
-            currentNote.transform.localPosition = new UnityEngine.Vector2(0, yPos + 0.125f);
+            currentNote.transform.localPosition = new Vector2(0, yPos + 0.125f);
             if (n._isLongNote)
             {
                 float legacyPos = yPos;
@@ -288,7 +287,7 @@ public class GameController : MonoBehaviour
                 tempGameNoteData.longNotePole.SetActive(true);
                 tempGameNoteData.longNotePole.SetActive(true);
                 tempGameNoteData.endPoint.SetActive(true);
-                tempGameNoteData.endPoint.transform.localPosition = new UnityEngine.Vector2(0, yPos - legacyPos);
+                tempGameNoteData.endPoint.transform.localPosition = new Vector2(0, yPos - legacyPos);
                 tempGameNoteData.ResizePole();
             }
             currentNote.GetComponent<GameNote>().data = n;
