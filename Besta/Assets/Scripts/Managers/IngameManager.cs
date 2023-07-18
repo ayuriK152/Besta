@@ -5,6 +5,7 @@ public class IngameManager
     public MusicPattern currentLoadedPattern;
     public int currentCombo;
     public int maxCombo;
+    public double acurracy;
 
     public void Init()
     {
@@ -14,9 +15,6 @@ public class IngameManager
 
     public void OnUpdate()
     {
-        if (currentCombo > maxCombo)
-        {
-            maxCombo = currentCombo;
-        }
+
     }
 }

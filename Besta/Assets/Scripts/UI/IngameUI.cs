@@ -10,6 +10,8 @@ public class IngameUI : MonoBehaviour
     TextMeshProUGUI judgeText;
     TextMeshProUGUI timingDiffText;
     TextMeshProUGUI comboText;
+    TextMeshProUGUI scoreText;
+    TextMeshProUGUI maxcomboText;
     Coroutine judgeTextCoroutine;
     Coroutine timingDiffTextCoroutine;
 
@@ -18,6 +20,8 @@ public class IngameUI : MonoBehaviour
         judgeText = GameObject.Find("JudgeText").GetComponent<TextMeshProUGUI>();
         timingDiffText = GameObject.Find("TimingDiffText").GetComponent<TextMeshProUGUI>();
         comboText = GameObject.Find("ComboText").GetComponent<TextMeshProUGUI>();
+        scoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
+        maxcomboText = GameObject.Find("MaxComboText").GetComponent<TextMeshProUGUI>();
         GameController.judgeAction -= OnJudgeTriggered;
         GameController.judgeAction += OnJudgeTriggered;
     }
@@ -33,49 +37,47 @@ public class IngameUI : MonoBehaviour
         switch (judge)
         {
             case Judge.Besta:
-                if (judgeTextCoroutine != null)
-                    StopCoroutine(judgeTextCoroutine);
-                judgeText.color = new Color(1, 0, 0, 1);
-                judgeText.text = "Besta";
-                judgeTextCoroutine = StartCoroutine(FadeJudgeText());
+                UpdateTexts(Judge.Besta, timingDiff, "Besta", new Color(1, 0, 0, 1));
                 break;
             case Judge.Good:
-                if (judgeTextCoroutine != null)
-                    StopCoroutine(judgeTextCoroutine);
-                if (timingDiffTextCoroutine != null)
-                    StopCoroutine(timingDiffTextCoroutine);
-                ChangeTimingDiffTextColor(timingDiff);
-                judgeText.color = new Color(0, 1, 0, 1);
-                judgeText.text = "Good";
-                timingDiffText.color = new Color(timingDiffText.color.r, timingDiffText.color.g, timingDiffText.color.b, 1);
-                judgeTextCoroutine = StartCoroutine(FadeJudgeText());
-                timingDiffTextCoroutine = StartCoroutine(FadeTimingText());
+                UpdateTexts(Judge.Good, timingDiff, "Good", new Color(0, 1, 0, 1));
                 break;
             case Judge.Bad:
-                if (judgeTextCoroutine != null)
-                    StopCoroutine(judgeTextCoroutine);
-                if (timingDiffTextCoroutine != null)
-                    StopCoroutine(timingDiffTextCoroutine);
-                ChangeTimingDiffTextColor(timingDiff);
-                judgeText.color = new Color(0, 0, 1, 1);
-                judgeText.text = "Bad";
-                timingDiffText.color = new Color(timingDiffText.color.r, timingDiffText.color.g, timingDiffText.color.b, 1);
-                judgeTextCoroutine = StartCoroutine(FadeJudgeText());
-                timingDiffTextCoroutine = StartCoroutine(FadeTimingText());
+                UpdateTexts(Judge.Bad, timingDiff, "Bad", new Color(0, 0, 1, 1));
                 break;
             case Judge.Miss:
-                if (judgeTextCoroutine != null)
-                    StopCoroutine(judgeTextCoroutine);
-                if (timingDiffTextCoroutine != null)
-                    StopCoroutine(timingDiffTextCoroutine);
-                ChangeTimingDiffTextColor(timingDiff);
-                judgeText.color = new Color(0.8f, 0.8f, 0.8f, 1);
-                judgeText.text = "Miss";
-                timingDiffText.color = new Color(timingDiffText.color.r, timingDiffText.color.g, timingDiffText.color.b, 1);
-                judgeTextCoroutine = StartCoroutine(FadeJudgeText());
-                timingDiffTextCoroutine = StartCoroutine(FadeTimingText());
+                UpdateTexts(Judge.Miss, timingDiff, "Miss", new Color(0.8f, 0.8f, 0.8f, 1));
+                break;
+            case Judge.None:
+                UpdateMaxComboText();
                 break;
         }
+    }
+
+    void UpdateTexts(Judge judge, double timingDiff, string text, Color textColor)
+    {
+        if (judgeTextCoroutine != null)
+            StopCoroutine(judgeTextCoroutine);
+        if (timingDiffTextCoroutine != null && judge != Judge.Besta)
+            StopCoroutine(timingDiffTextCoroutine);
+        ChangeTimingDiffTextColor(timingDiff);
+        judgeText.color = textColor;
+        judgeText.text = text;
+        UpdateMaxComboText();
+        if (judge != Judge.Besta)
+        {
+            timingDiffText.color = new Color(timingDiffText.color.r, timingDiffText.color.g, timingDiffText.color.b, 1);
+            timingDiffTextCoroutine = StartCoroutine(FadeTimingText());
+        }
+        judgeTextCoroutine = StartCoroutine(FadeJudgeText());
+    }
+
+    void UpdateMaxComboText()
+    {
+        if (Managers.Game.currentCombo > Managers.Game.maxCombo)
+            Managers.Game.maxCombo = Managers.Game.currentCombo;
+        if (Managers.Game.maxCombo > Convert.ToInt32(maxcomboText.text))
+            maxcomboText.text = Convert.ToString(Managers.Game.maxCombo);
     }
 
     void ChangeTimingDiffTextColor(double timingDiff)

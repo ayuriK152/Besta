@@ -125,7 +125,7 @@ public class GameController : MonoBehaviour
         else
         {
             holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data._startTiming;
-            holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
+            holdingSampleAmout[lane] += _barSampleAmount * 0.25f;
         }
         JudgingInput(diff);
     }
@@ -157,13 +157,13 @@ public class GameController : MonoBehaviour
             if ((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
             {
                 holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
-                Managers.Game.currentCombo++;
+                Managers.Game.currentCombo += 1;
                 judgeAction.Invoke(Judge.None, diff);
             }
             else if (laneNoteDatas[lane].Peek().data._endTiming <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
             {
                 holdingSampleAmout[lane] = 0;
-                Managers.Game.currentCombo++;
+                Managers.Game.currentCombo += 1;
                 judgeAction.Invoke(Judge.None, diff);
                 laneNoteDatas[lane].Dequeue();
                 Destroy(laneNotes[lane].Dequeue());
@@ -215,21 +215,21 @@ public class GameController : MonoBehaviour
         {
             Debug.Log("Besta");
             gainedScore += 3;
-            Managers.Game.currentCombo++;
+            Managers.Game.currentCombo += 1;
             judgeAction.Invoke(Judge.Besta, diff);
         }
         else if (diff <= 0.1 && diff >= -0.1)
         {
             Debug.Log("Good");
             gainedScore += 2;
-            Managers.Game.currentCombo++;
+            Managers.Game.currentCombo += 1;
             judgeAction.Invoke(Judge.Good, diff);
         }
         else if (diff <= 0.16667 && diff >= -0.16667)
         {
             Debug.Log("Bad");
             gainedScore += 1;
-            Managers.Game.currentCombo++;
+            Managers.Game.currentCombo += 1;
             judgeAction.Invoke(Judge.Bad, diff);
         }
         else
