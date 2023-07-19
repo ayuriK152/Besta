@@ -83,10 +83,29 @@ public class GameController : MonoBehaviour
             Destroy(laneNotes[lane].Dequeue());
             JudgingInput((laneNoteDatas[lane].Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
         }
-        else if (laneNoteDatas[lane].Peek().data._isLongNote && (laneNoteDatas[lane].Peek().data._endTiming + diffUpdatesAlways) / 44100 < -0.3)
+        else if (laneNoteDatas[lane].Peek().data._isLongNote)
         {
-            Destroy(laneNotes[lane].Dequeue());
-            JudgingInput((laneNoteDatas[lane].Dequeue().data._endTiming + diffUpdatesAlways) / 44100);
+            if ((laneNoteDatas[lane].Peek().data._endTiming + diffUpdatesAlways) / 44100 < -0.2)
+            {
+                holdingSampleAmout[lane] = 0;
+                Destroy(laneNotes[lane].Dequeue());
+                JudgingInput((laneNoteDatas[lane].Dequeue().data._endTiming + diffUpdatesAlways) / 44100);
+            }
+            else if (((laneNoteDatas[lane].Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667 && holdingSampleAmout[lane] == 0) ||
+                (((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / 44100 < -0.16667) && holdingSampleAmout[lane] > 0)
+            {
+                if (holdingSampleAmout[lane] == 0)
+                {
+                    holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data._startTiming;
+                    JudgingInput((laneNoteDatas[lane].Peek().data._startTiming + diffUpdatesAlways) / 44100);
+                    holdingSampleAmout[lane] += _barSampleAmount * 0.25f;
+                }
+                else
+                {
+                    JudgingInput(((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / 44100);
+                    holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
+                }
+            }
         }
     }
 
