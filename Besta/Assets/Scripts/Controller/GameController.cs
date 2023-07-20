@@ -77,27 +77,27 @@ public class GameController : MonoBehaviour
     void CheckMissingNote(int lane)
     {
         lane -= 1;
-        diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
-        if (!laneNoteDatas[lane].Peek().data._isLongNote && (laneNoteDatas[lane].Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667)
+        diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset);
+        if (!laneNoteDatas[lane].Peek().data.isLongNote && (laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / 44100 < -0.16667)
         {
             Destroy(laneNotes[lane].Dequeue());
-            JudgingInput((laneNoteDatas[lane].Dequeue().data._startTiming + diffUpdatesAlways) / 44100);
+            JudgingInput((laneNoteDatas[lane].Dequeue().data.startTiming + diffUpdatesAlways) / 44100);
         }
-        else if (laneNoteDatas[lane].Peek().data._isLongNote)
+        else if (laneNoteDatas[lane].Peek().data.isLongNote)
         {
-            if ((laneNoteDatas[lane].Peek().data._endTiming + diffUpdatesAlways) / 44100 < -0.2)
+            if ((laneNoteDatas[lane].Peek().data.endTiming + diffUpdatesAlways) / 44100 < -0.2)
             {
                 holdingSampleAmout[lane] = 0;
                 Destroy(laneNotes[lane].Dequeue());
-                JudgingInput((laneNoteDatas[lane].Dequeue().data._endTiming + diffUpdatesAlways) / 44100);
+                JudgingInput((laneNoteDatas[lane].Dequeue().data.endTiming + diffUpdatesAlways) / 44100);
             }
-            else if (((laneNoteDatas[lane].Peek().data._startTiming + diffUpdatesAlways) / 44100 < -0.16667 && holdingSampleAmout[lane] == 0) ||
+            else if (((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / 44100 < -0.16667 && holdingSampleAmout[lane] == 0) ||
                 (((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / 44100 < -0.16667) && holdingSampleAmout[lane] > 0)
             {
                 if (holdingSampleAmout[lane] == 0)
                 {
-                    holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data._startTiming;
-                    JudgingInput((laneNoteDatas[lane].Peek().data._startTiming + diffUpdatesAlways) / 44100);
+                    holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data.startTiming;
+                    JudgingInput((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / 44100);
                     holdingSampleAmout[lane] += _barSampleAmount * 0.25f;
                 }
                 else
@@ -111,7 +111,7 @@ public class GameController : MonoBehaviour
 
     public void PlayerKeyDown(KeyCode key)
     {
-        diff = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset);
+        diff = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset);
         switch (key)
         {
             case KeyCode.S:
@@ -133,17 +133,17 @@ public class GameController : MonoBehaviour
     {
         lane -= 1;
         lanePressEffects[lane].enabled = true;
-        diff = (laneNoteDatas[lane].Peek().data._startTiming + diff) / 44100;
+        diff = (laneNoteDatas[lane].Peek().data.startTiming + diff) / 44100;
         if (diff > 0.2)
             return;
-        if (!laneNoteDatas[lane].Peek().data._isLongNote)
+        if (!laneNoteDatas[lane].Peek().data.isLongNote)
         {
             laneNoteDatas[lane].Dequeue();
             Destroy(laneNotes[lane].Dequeue());
         }
         else
         {
-            holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data._startTiming;
+            holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data.startTiming;
             holdingSampleAmout[lane] += _barSampleAmount * 0.25f;
         }
         JudgingInput(diff);
@@ -173,19 +173,20 @@ public class GameController : MonoBehaviour
         lane -= 1;
         if (holdingSampleAmout[lane] > 0)
         {
-            if ((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
-            {
-                holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
-                Managers.Game.currentCombo += 1;
-                judgeAction.Invoke(Judge.None, diff);
-            }
-            else if (laneNoteDatas[lane].Peek().data._endTiming <= Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)
+            int timingPoint = Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset;
+            if (laneNoteDatas[lane].Peek().data.endTiming <= timingPoint)
             {
                 holdingSampleAmout[lane] = 0;
                 Managers.Game.currentCombo += 1;
                 judgeAction.Invoke(Judge.None, diff);
                 laneNoteDatas[lane].Dequeue();
                 Destroy(laneNotes[lane].Dequeue());
+            }
+            else if (holdingSampleAmout[lane] <= timingPoint)
+            {
+                holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
+                Managers.Game.currentCombo += 1;
+                judgeAction.Invoke(Judge.None, diff);
             }
         }
     }
@@ -215,7 +216,7 @@ public class GameController : MonoBehaviour
         lanePressEffects[lane].enabled = false;
         if (holdingSampleAmout[lane] > 0)
         {
-            double tempDiff = (double)(laneNoteDatas[lane].Peek().data._endTiming - (Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern._songOffset)) / 44100;
+            double tempDiff = (double)(laneNoteDatas[lane].Peek().data.endTiming - (Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset)) / 44100;
             if (tempDiff <= 0.16667 && tempDiff >= -0.16667)
             {
                 holdingSampleAmout[lane] = 0;
@@ -266,9 +267,9 @@ public class GameController : MonoBehaviour
         patternObject.transform.Translate(new Vector3(0, -Managers.Sound.managerAudioSource.clip.frequency / _barSampleAmount * 4.8f, 0) * 3 * Time.deltaTime);
         if (isPlaying && !Managers.Sound.managerAudioSource.isPlaying)
         {
-            if (-patternObject.transform.localPosition.y / (4.8f * 3) >= 2 && (_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * 3 * 2)) / (4.8f * 3)) >= Managers.Game.currentLoadedPattern._songOffset))
+            if (-patternObject.transform.localPosition.y / (4.8f * 3) >= 2 && (_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * 3 * 2)) / (4.8f * 3)) >= Managers.Game.currentLoadedPattern.songOffset))
             {
-                Managers.Sound.managerAudioSource.timeSamples = (int)(_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * 3 * 2)) / (4.8f * 3)) - Managers.Game.currentLoadedPattern._songOffset);
+                Managers.Sound.managerAudioSource.timeSamples = (int)(_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * 3 * 2)) / (4.8f * 3)) - Managers.Game.currentLoadedPattern.songOffset);
                 Managers.Sound.managerAudioSource.Play();
             }
         }
@@ -276,11 +277,11 @@ public class GameController : MonoBehaviour
 
     public void LoadPattern()
     {
-        _barSampleAmount = (Managers.Game.currentLoadedPattern._musicSource.frequency / (Managers.Game.currentLoadedPattern._bpm / (float)60)) * 4;
-        foreach (Note n in Managers.Game.currentLoadedPattern._noteDatas)
+        _barSampleAmount = (Managers.Game.currentLoadedPattern.musicSource.frequency / (Managers.Game.currentLoadedPattern.bpm / (float)60)) * 4;
+        foreach (Note n in Managers.Game.currentLoadedPattern.noteDatas)
         {
             GameObject currentNote = null;
-            switch (n._laneNumber)  // 레인별로 입력을 처리하기 위해 따로 큐에 저장한 후 선입선출 방식으로 처리
+            switch (n.laneNumber)  // 레인별로 입력을 처리하기 위해 따로 큐에 저장한 후 선입선출 방식으로 처리
             {
                 case LaneNumber.First:
                     currentNote = Instantiate(gameNotePref, laneTransforms[0]);
@@ -296,12 +297,12 @@ public class GameController : MonoBehaviour
                     break;
             }
             // yPos 값을 계산하는 수식의 마지막 인수는 유저의 개인 설정 스크롤 속도가 되어야 한다. 임시 방편으로 보기 좋기 위해 3으로 설정해 뒀으므로 관련 수정 필요.
-            float yPos = (n._startTiming / _barSampleAmount * 4.8f * 3) + 4.8f * 3 * 2;
+            float yPos = (n.startTiming / _barSampleAmount * 4.8f * 3) + 4.8f * 3 * 2;
             currentNote.transform.localPosition = new Vector2(0, yPos + 0.125f);
-            if (n._isLongNote)
+            if (n.isLongNote)
             {
                 float legacyPos = yPos;
-                yPos = (n._endTiming / _barSampleAmount * 4.8f * 3) + 4.8f * 3 * 2;
+                yPos = (n.endTiming / _barSampleAmount * 4.8f * 3) + 4.8f * 3 * 2;
                 GameNote tempGameNoteData = currentNote.GetComponent<GameNote>();
                 tempGameNoteData.longNotePole.SetActive(true);
                 tempGameNoteData.longNotePole.SetActive(true);
@@ -311,7 +312,7 @@ public class GameController : MonoBehaviour
             }
             currentNote.GetComponent<GameNote>().data = n;
 
-            switch (n._laneNumber)  
+            switch (n.laneNumber)  
             {
                 case LaneNumber.First:
                     laneNotes[0].Enqueue(currentNote);
