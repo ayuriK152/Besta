@@ -259,7 +259,8 @@ public class GameController : MonoBehaviour
             Managers.Game.currentCombo = 0;
             judgeAction.Invoke(Judge.Miss, diff);
         }
-        Debug.Log((float)gainedScore / perfectScore);
+        Managers.Game.acurracy = (double)gainedScore / perfectScore;
+        Debug.Log(Managers.Game.acurracy);
     }
 
     void ScrollPattern()

@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -11,6 +12,8 @@ public class EditorUI : MonoBehaviour
     public Slider editorPlayValueSlider;
     TMP_InputField baseBPMInputField;
     TMP_InputField offsetInputField;
+    TextMeshProUGUI progressPercetageText;
+    TextMeshProUGUI maxComboText;
 
     void Start()
     {
@@ -18,18 +21,28 @@ public class EditorUI : MonoBehaviour
         beatChangeDropdown.value = 3;
         noteModeChangeDropdown = GameObject.Find("NoteModeSelector").transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
         noteModeChangeDropdown.value = 0;
-        editorPlayValueSlider = transform.Find("PlayValueSlider").transform.GetComponent<Slider>();
+        editorPlayValueSlider = GameObject.Find("PlayValueSlider").transform.GetComponent<Slider>();
         editorPlayValueSlider.value = 0;
         baseBPMInputField = GameObject.Find("BPMSetting").transform.Find("InputField").GetComponent<TMP_InputField>();
         baseBPMInputField.text = EditorController.baseBPM.ToString();
         offsetInputField = GameObject.Find("OffsetSetting").transform.Find("InputField").GetComponent<TMP_InputField>();
         offsetInputField.text = EditorController.patternOffset.ToString();
+        progressPercetageText = GameObject.Find("Progress").transform.Find("Value").GetComponent<TextMeshProUGUI>();
+        progressPercetageText.text = "0.0%";
+        maxComboText = GameObject.Find("MaxCombo").transform.Find("Value").GetComponent<TextMeshProUGUI>();
+        maxComboText.text = "0";
+
+        EditorController.PatternSettingChangeAction -= OnMaxComboChange;
+        EditorController.PatternSettingChangeAction += OnMaxComboChange;
     }
 
     void Update()
     {
         if (EditorController.isGridScrolling)
+        {
             editorPlayValueSlider.value = EditorController.currentPlayValue;
+            progressPercetageText.text = $"{(Math.Truncate(editorPlayValueSlider.value * 10000) / 100).ToString("F2")}%";
+        }
         if (EditorController.isPlayValueChanged)
         {
             editorPlayValueSlider.value = EditorController.currentPlayValue;
@@ -54,6 +67,7 @@ public class EditorUI : MonoBehaviour
     {
         if (!EditorController.isGridScrolling)
         {
+            progressPercetageText.text = $"{(Math.Truncate(editorPlayValueSlider.value * 10000) / 100).ToString("F2")}%";
             EditorController.currentPlayValue = editorPlayValueSlider.value;
             EditorController.PlayValueChangeAction.Invoke(true);
         }
@@ -94,5 +108,10 @@ public class EditorUI : MonoBehaviour
     public void OnCreateButtonClick()
     {
         EditorController.PatternCreateAction.Invoke();
+    }
+
+    public void OnMaxComboChange()
+    {
+        maxComboText.text = EditorController.totalCombo.ToString();
     }
 }

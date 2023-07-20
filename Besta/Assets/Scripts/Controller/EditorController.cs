@@ -21,7 +21,7 @@ public class EditorController : MonoBehaviour
     public static float currentPlayValue;       // 노래 파일의 샘플 레이트 기준 재생 시간 측정용
     public static int baseBPM;
     public static int patternOffset;
-
+    public static int totalCombo = 0;
     
     MusicPattern _musicPattern;
     double _noteTimingValue;
@@ -557,15 +557,12 @@ public class EditorController : MonoBehaviour
                 updateAmount += temp - (int)temp == 0 ? (int)temp - 1 : (int)temp;
             }
         }
-        if (isIncrease)
-        {
-            _musicPattern.totalCombo += updateAmount;
-            return updateAmount;
-        }
-        else
-        {
-            _musicPattern.totalCombo -= updateAmount;
-            return -updateAmount;
-        }
+        if (!isIncrease)
+            updateAmount = -updateAmount;
+
+        _musicPattern.totalCombo += updateAmount;
+        totalCombo = _musicPattern.totalCombo;
+        PatternSettingChangeAction.Invoke();
+        return updateAmount;
     }
 }
