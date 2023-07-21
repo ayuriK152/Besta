@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static Datas;
@@ -15,8 +16,8 @@ public class GameController : MonoBehaviour
     double diff;
     double diffUpdatesAlways;
     float[] holdingSampleAmout = new float[4];
-
-    int gainedScore = 0, perfectScore = 0;
+    int gainedAcc = 0, perfectAcc = 0;
+    int passedNote;
 
     public static bool isPlaying;
 
@@ -81,7 +82,7 @@ public class GameController : MonoBehaviour
         if (!laneNoteDatas[lane].Peek().data.isLongNote && (laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / 44100 < -0.16667)
         {
             Destroy(laneNotes[lane].Dequeue());
-            JudgingInput((laneNoteDatas[lane].Dequeue().data.startTiming + diffUpdatesAlways) / 44100);
+            StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.startTiming + diffUpdatesAlways) / 44100));
         }
         else if (laneNoteDatas[lane].Peek().data.isLongNote)
         {
@@ -89,7 +90,7 @@ public class GameController : MonoBehaviour
             {
                 holdingSampleAmout[lane] = 0;
                 Destroy(laneNotes[lane].Dequeue());
-                JudgingInput((laneNoteDatas[lane].Dequeue().data.endTiming + diffUpdatesAlways) / 44100);
+                StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.endTiming + diffUpdatesAlways) / 44100));
             }
             else if (((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / 44100 < -0.16667 && holdingSampleAmout[lane] == 0) ||
                 (((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / 44100 < -0.16667) && holdingSampleAmout[lane] > 0)
@@ -97,12 +98,12 @@ public class GameController : MonoBehaviour
                 if (holdingSampleAmout[lane] == 0)
                 {
                     holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data.startTiming;
-                    JudgingInput((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / 44100);
+                    StartCoroutine(JudgingInput((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / 44100));
                     holdingSampleAmout[lane] += _barSampleAmount * 0.25f;
                 }
                 else
                 {
-                    JudgingInput(((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / 44100);
+                    StartCoroutine(JudgingInput(((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / 44100));
                     holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
                 }
             }
@@ -146,7 +147,7 @@ public class GameController : MonoBehaviour
             holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data.startTiming;
             holdingSampleAmout[lane] += _barSampleAmount * 0.25f;
         }
-        JudgingInput(diff);
+        StartCoroutine(JudgingInput(diff));
     }
 
     public void PlayerKeyPress(KeyCode key)
@@ -181,12 +182,14 @@ public class GameController : MonoBehaviour
                 judgeAction.Invoke(Judge.None, diff);
                 laneNoteDatas[lane].Dequeue();
                 Destroy(laneNotes[lane].Dequeue());
+                StartCoroutine(CalcScore());
             }
             else if (holdingSampleAmout[lane] <= timingPoint)
             {
                 holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
                 Managers.Game.currentCombo += 1;
                 judgeAction.Invoke(Judge.None, diff);
+                StartCoroutine(CalcScore());
             }
         }
     }
@@ -196,21 +199,21 @@ public class GameController : MonoBehaviour
         switch (key)
         {
             case KeyCode.S:
-                CheckLongNoteKeyUp((int)LaneNumber.First);
+                StartCoroutine(CheckLongNoteKeyUp((int)LaneNumber.First));
                 break;
             case KeyCode.D:
-                CheckLongNoteKeyUp((int)LaneNumber.Second);
+                StartCoroutine(CheckLongNoteKeyUp((int)LaneNumber.Second));
                 break;
             case KeyCode.L:
-                CheckLongNoteKeyUp((int)LaneNumber.Third);
+                StartCoroutine(CheckLongNoteKeyUp((int)LaneNumber.Third));
                 break;
             case KeyCode.Semicolon:
-                CheckLongNoteKeyUp((int)LaneNumber.Fourth);
+                StartCoroutine(CheckLongNoteKeyUp((int)LaneNumber.Fourth));
                 break;
         }
     }
 
-    void CheckLongNoteKeyUp(int lane)
+    IEnumerator CheckLongNoteKeyUp(int lane)
     {
         lane -= 1;
         lanePressEffects[lane].enabled = false;
@@ -224,43 +227,55 @@ public class GameController : MonoBehaviour
                 judgeAction.Invoke(Judge.None, diff);
                 laneNoteDatas[lane].Dequeue();
                 Destroy(laneNotes[lane].Dequeue());
+                StartCoroutine(CalcScore());
             }
         }
+        yield return null;
     }
 
-    void JudgingInput(double diff)
+    IEnumerator CalcScore()
     {
-        perfectScore += 3;
+        passedNote += 1;
+        Managers.Game.acurracy = (double)gainedAcc / perfectAcc;
+        Managers.Game.progressByCombo = (double)passedNote / Managers.Game.currentLoadedPattern.totalCombo;
+        Managers.Game.gainedScore = (int)((1000000 * Managers.Game.progressByCombo) * Managers.Game.acurracy);
+        Debug.Log($"{Managers.Game.gainedScore} {Managers.Game.acurracy} {Managers.Game.progressByCombo}");
+        yield return null;
+    }
+
+    IEnumerator JudgingInput(double diff)
+    {
+        perfectAcc += 3;
         if (diff <= 0.04167 && diff >= -0.04167)
         {
             Debug.Log("Besta");
-            gainedScore += 3;
+            gainedAcc += 3;
             Managers.Game.currentCombo += 1;
             judgeAction.Invoke(Judge.Besta, diff);
         }
         else if (diff <= 0.1 && diff >= -0.1)
         {
             Debug.Log("Good");
-            gainedScore += 2;
+            gainedAcc += 2;
             Managers.Game.currentCombo += 1;
             judgeAction.Invoke(Judge.Good, diff);
         }
         else if (diff <= 0.16667 && diff >= -0.16667)
         {
             Debug.Log("Bad");
-            gainedScore += 1;
+            gainedAcc += 1;
             Managers.Game.currentCombo += 1;
             judgeAction.Invoke(Judge.Bad, diff);
         }
         else
         {
             Debug.LogWarning("Miss");
-            gainedScore += 0;
+            gainedAcc += 0;
             Managers.Game.currentCombo = 0;
             judgeAction.Invoke(Judge.Miss, diff);
         }
-        Managers.Game.acurracy = (double)gainedScore / perfectScore;
-        Debug.Log(Managers.Game.acurracy);
+        StartCoroutine(CalcScore());
+        yield return null;
     }
 
     void ScrollPattern()
