@@ -94,7 +94,7 @@ public class GameController : MonoBehaviour
                 StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.endTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency));
             }
             else if (((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667 && holdingSampleAmout[lane] == 0) ||
-                (((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667) && holdingSampleAmout[lane] > 0)
+                (((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667) && holdingSampleAmout[lane] > 0 && laneNoteDatas[lane].Peek().data.endTiming > holdingSampleAmout[lane])
             {
                 if (holdingSampleAmout[lane] == 0)
                 {
