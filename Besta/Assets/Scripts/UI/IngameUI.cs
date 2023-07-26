@@ -21,9 +21,13 @@ public class IngameUI : MonoBehaviour
         timingDiffText = GameObject.Find("TimingDiffText").GetComponent<TextMeshProUGUI>();
         comboText = GameObject.Find("ComboText").GetComponent<TextMeshProUGUI>();
         scoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
+        scoreText.text = "0";
         maxcomboText = GameObject.Find("MaxComboText").GetComponent<TextMeshProUGUI>();
-        GameController.judgeAction -= OnJudgeTriggered;
-        GameController.judgeAction += OnJudgeTriggered;
+
+        GameController.JudgeAction -= OnJudgeTriggered;
+        GameController.JudgeAction += OnJudgeTriggered;
+        GameController.ScoreUpdateAction -= OnScoreUpdate;
+        GameController.ScoreUpdateAction += OnScoreUpdate;
     }
 
     public void OnStartButtonClick()
@@ -95,6 +99,11 @@ public class IngameUI : MonoBehaviour
             timingDiffText.text = $"LATE {Math.Truncate(timingDiff * 10000) / 10} ms";
             timingDiffText.color = new Color(0.2f, 0.2f, 0.7f, 0);
         }
+    }
+
+    void OnScoreUpdate()
+    {
+        scoreText.text = Managers.Game.gainedScore.ToString();
     }
 
     IEnumerator FadeJudgeText()

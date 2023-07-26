@@ -19,8 +19,11 @@ public class Define
     {
         One,
         Two,
+        Three,
         Four,
+        Six,
         Eight,
+        Nine,
         Sixteen,
         None
     }

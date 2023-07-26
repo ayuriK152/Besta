@@ -18,7 +18,7 @@ public class EditorUI : MonoBehaviour
     void Start()
     {
         beatChangeDropdown = GameObject.Find("BeatSelector").transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
-        beatChangeDropdown.value = 3;
+        beatChangeDropdown.value = 5;
         noteModeChangeDropdown = GameObject.Find("NoteModeSelector").transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
         noteModeChangeDropdown.value = 0;
         editorPlayValueSlider = GameObject.Find("PlayValueSlider").transform.GetComponent<Slider>();

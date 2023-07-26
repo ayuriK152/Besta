@@ -24,7 +24,8 @@ public class GameController : MonoBehaviour
     public Queue<GameObject>[] laneNotes = new Queue<GameObject>[4];
     public Queue<GameNote>[] laneNoteDatas = new Queue<GameNote>[4];
 
-    public static Action<Judge, double> judgeAction = null;
+    public static Action<Judge, double> JudgeAction = null;
+    public static Action ScoreUpdateAction = null;
     void Start()
     {
         gameNotePref = Resources.Load("Prefabs/GameNote") as GameObject;
@@ -79,31 +80,31 @@ public class GameController : MonoBehaviour
     {
         lane -= 1;
         diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset);
-        if (!laneNoteDatas[lane].Peek().data.isLongNote && (laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / 44100 < -0.16667)
+        if (!laneNoteDatas[lane].Peek().data.isLongNote && (laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667)
         {
             Destroy(laneNotes[lane].Dequeue());
-            StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.startTiming + diffUpdatesAlways) / 44100));
+            StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency));
         }
         else if (laneNoteDatas[lane].Peek().data.isLongNote)
         {
-            if ((laneNoteDatas[lane].Peek().data.endTiming + diffUpdatesAlways) / 44100 < -0.2)
+            if ((laneNoteDatas[lane].Peek().data.endTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.2)
             {
                 holdingSampleAmout[lane] = 0;
                 Destroy(laneNotes[lane].Dequeue());
-                StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.endTiming + diffUpdatesAlways) / 44100));
+                StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.endTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency));
             }
-            else if (((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / 44100 < -0.16667 && holdingSampleAmout[lane] == 0) ||
-                (((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / 44100 < -0.16667) && holdingSampleAmout[lane] > 0)
+            else if (((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667 && holdingSampleAmout[lane] == 0) ||
+                (((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667) && holdingSampleAmout[lane] > 0)
             {
                 if (holdingSampleAmout[lane] == 0)
                 {
                     holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data.startTiming;
-                    StartCoroutine(JudgingInput((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / 44100));
+                    StartCoroutine(JudgingInput((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency));
                     holdingSampleAmout[lane] += _barSampleAmount * 0.25f;
                 }
                 else
                 {
-                    StartCoroutine(JudgingInput(((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / 44100));
+                    StartCoroutine(JudgingInput(((holdingSampleAmout[lane] - (int)holdingSampleAmout[lane] > 0.5f ? (int)holdingSampleAmout[lane] + 1 : holdingSampleAmout[lane]) + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency));
                     holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
                 }
             }
@@ -116,26 +117,26 @@ public class GameController : MonoBehaviour
         switch (key)
         {
             case KeyCode.S:
-                NoteProcessKeyDown((int)LaneNumber.First);
+                NoteProcessKeyDown((int)LaneNumber.First, diff);
                 break;
             case KeyCode.D:
-                NoteProcessKeyDown((int)LaneNumber.Second);
+                NoteProcessKeyDown((int)LaneNumber.Second, diff);
                 break;
             case KeyCode.L:
-                NoteProcessKeyDown((int)LaneNumber.Third);
+                NoteProcessKeyDown((int)LaneNumber.Third, diff);
                 break;
             case KeyCode.Semicolon:
-                NoteProcessKeyDown((int)LaneNumber.Fourth);
+                NoteProcessKeyDown((int)LaneNumber.Fourth, diff);
                 break;
         }
     }
 
-    void NoteProcessKeyDown(int lane)
+    void NoteProcessKeyDown(int lane, double timingDiff)
     {
         lane -= 1;
         lanePressEffects[lane].enabled = true;
-        diff = (laneNoteDatas[lane].Peek().data.startTiming + diff) / 44100;
-        if (diff > 0.2)
+        timingDiff = (laneNoteDatas[lane].Peek().data.startTiming + timingDiff) / Managers.Sound.managerAudioSource.clip.frequency;
+        if (timingDiff > 0.2)
             return;
         if (!laneNoteDatas[lane].Peek().data.isLongNote)
         {
@@ -147,39 +148,39 @@ public class GameController : MonoBehaviour
             holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data.startTiming;
             holdingSampleAmout[lane] += _barSampleAmount * 0.25f;
         }
-        StartCoroutine(JudgingInput(diff));
+        StartCoroutine(JudgingInput(timingDiff));
     }
 
     public void PlayerKeyPress(KeyCode key)
     {
+        int timingPoint = Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset;
         switch (key)
         {
             case KeyCode.S:
-                LongNoteProcessKeyPress((int)LaneNumber.First);
+                LongNoteProcessKeyPress((int)LaneNumber.First, timingPoint);
                 break;
             case KeyCode.D:
-                LongNoteProcessKeyPress((int)LaneNumber.Second);
+                LongNoteProcessKeyPress((int)LaneNumber.Second, timingPoint);
                 break;
             case KeyCode.L:
-                LongNoteProcessKeyPress((int)LaneNumber.Third);
+                LongNoteProcessKeyPress((int)LaneNumber.Third, timingPoint);
                 break;
             case KeyCode.Semicolon:
-                LongNoteProcessKeyPress((int)LaneNumber.Fourth);
+                LongNoteProcessKeyPress((int)LaneNumber.Fourth, timingPoint);
                 break;
         }
     }
 
-    void LongNoteProcessKeyPress(int lane)
+    void LongNoteProcessKeyPress(int lane, int timingPoint)
     {
         lane -= 1;
         if (holdingSampleAmout[lane] > 0)
         {
-            int timingPoint = Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset;
             if (laneNoteDatas[lane].Peek().data.endTiming <= timingPoint)
             {
                 holdingSampleAmout[lane] = 0;
                 Managers.Game.currentCombo += 1;
-                judgeAction.Invoke(Judge.None, diff);
+                JudgeAction.Invoke(Judge.None, diff);
                 laneNoteDatas[lane].Dequeue();
                 Destroy(laneNotes[lane].Dequeue());
                 StartCoroutine(CalcScore());
@@ -188,7 +189,7 @@ public class GameController : MonoBehaviour
             {
                 holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
                 Managers.Game.currentCombo += 1;
-                judgeAction.Invoke(Judge.None, diff);
+                JudgeAction.Invoke(Judge.None, diff);
                 StartCoroutine(CalcScore());
             }
         }
@@ -219,12 +220,12 @@ public class GameController : MonoBehaviour
         lanePressEffects[lane].enabled = false;
         if (holdingSampleAmout[lane] > 0)
         {
-            double tempDiff = (double)(laneNoteDatas[lane].Peek().data.endTiming - (Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset)) / 44100;
+            double tempDiff = (double)(laneNoteDatas[lane].Peek().data.endTiming - (Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset)) / Managers.Sound.managerAudioSource.clip.frequency;
             if (tempDiff <= 0.16667 && tempDiff >= -0.16667)
             {
                 holdingSampleAmout[lane] = 0;
                 Managers.Game.currentCombo++;
-                judgeAction.Invoke(Judge.None, diff);
+                JudgeAction.Invoke(Judge.None, diff);
                 laneNoteDatas[lane].Dequeue();
                 Destroy(laneNotes[lane].Dequeue());
                 StartCoroutine(CalcScore());
@@ -240,6 +241,7 @@ public class GameController : MonoBehaviour
         Managers.Game.progressByCombo = (double)passedNote / Managers.Game.currentLoadedPattern.totalCombo;
         Managers.Game.gainedScore = (int)((1000000 * Managers.Game.progressByCombo) * Managers.Game.acurracy);
         Debug.Log($"{Managers.Game.gainedScore} {Managers.Game.acurracy} {Managers.Game.progressByCombo}");
+        ScoreUpdateAction.Invoke();
         yield return null;
     }
 
@@ -251,28 +253,28 @@ public class GameController : MonoBehaviour
             Debug.Log("Besta");
             gainedAcc += 3;
             Managers.Game.currentCombo += 1;
-            judgeAction.Invoke(Judge.Besta, diff);
+            JudgeAction.Invoke(Judge.Besta, diff);
         }
         else if (diff <= 0.1 && diff >= -0.1)
         {
             Debug.Log("Good");
             gainedAcc += 2;
             Managers.Game.currentCombo += 1;
-            judgeAction.Invoke(Judge.Good, diff);
+            JudgeAction.Invoke(Judge.Good, diff);
         }
         else if (diff <= 0.16667 && diff >= -0.16667)
         {
             Debug.Log("Bad");
             gainedAcc += 1;
             Managers.Game.currentCombo += 1;
-            judgeAction.Invoke(Judge.Bad, diff);
+            JudgeAction.Invoke(Judge.Bad, diff);
         }
         else
         {
             Debug.LogWarning("Miss");
             gainedAcc += 0;
             Managers.Game.currentCombo = 0;
-            judgeAction.Invoke(Judge.Miss, diff);
+            JudgeAction.Invoke(Judge.Miss, diff);
         }
         StartCoroutine(CalcScore());
         yield return null;
