@@ -62,7 +62,7 @@ public class IngameUI : MonoBehaviour
     {
         if (judgeTextCoroutine != null)
             StopCoroutine(judgeTextCoroutine);
-        if (judge != Judge.Besta)
+        if (judge != Judge.Besta && judge != Judge.Miss && timingDiff != 0)
         {
             if (timingDiffTextCoroutine != null)
                 StopCoroutine(timingDiffTextCoroutine);
@@ -71,7 +71,7 @@ public class IngameUI : MonoBehaviour
         judgeText.color = textColor;
         judgeText.text = text;
         UpdateMaxComboText();
-        if (judge != Judge.Besta)
+        if (judge != Judge.Besta && judge != Judge.Miss && timingDiff != 0)
         {
             timingDiffText.color = new Color(timingDiffText.color.r, timingDiffText.color.g, timingDiffText.color.b, 1);
             timingDiffTextCoroutine = StartCoroutine(FadeTimingText());

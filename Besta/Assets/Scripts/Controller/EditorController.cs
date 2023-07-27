@@ -555,19 +555,7 @@ public class EditorController : MonoBehaviour
             updateAmount = 1;
 
         else if (n.isLongNote)
-        {
-            double tempFirstPoint = n.startTiming + _timingValuePerBar * 0.25f;
-            if (n.endTiming - tempFirstPoint <= 1)
-                updateAmount = 2;
-
-            else
-            {
-                updateAmount = 3;
-                double temp = n.startTiming + _timingValuePerBar * 0.375;
-                for (double i = temp; n.endTiming - i > 1; i += _timingValuePerBar * 0.125)
-                    updateAmount++;
-            }
-        }
+            updateAmount = 2;
         if (!isIncrease)
             updateAmount = -updateAmount;
 
