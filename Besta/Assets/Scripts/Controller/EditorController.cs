@@ -557,15 +557,15 @@ public class EditorController : MonoBehaviour
         else if (n.isLongNote)
         {
             double tempFirstPoint = n.startTiming + _timingValuePerBar * 0.25f;
-            if ((tempFirstPoint - (int)tempFirstPoint >= 0.5 ? (int)tempFirstPoint + 1 : (int)tempFirstPoint) >= n.endTiming)
+            if (n.endTiming - tempFirstPoint <= 1)
                 updateAmount = 2;
 
             else
             {
                 updateAmount = 3;
-                double temp = (n.endTiming - n.startTiming - _timingValuePerBar * 0.25) / (_timingValuePerBar * 0.125);
-                
-                updateAmount += temp - (int)temp == 0 ? (int)temp - 1 : (int)temp;
+                double temp = n.startTiming + _timingValuePerBar * 0.375;
+                for (double i = temp; n.endTiming - i > 1; i += _timingValuePerBar * 0.125)
+                    updateAmount++;
             }
         }
         if (!isIncrease)
@@ -600,7 +600,7 @@ public class EditorController : MonoBehaviour
                 beatDivideNum = 8;
                 break;
             case Beat.Nine:
-                beatDivideNum = 9;
+                beatDivideNum = 12;
                 break;
             case Beat.Sixteen:
                 beatDivideNum = 16;

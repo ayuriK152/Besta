@@ -21,7 +21,7 @@ public class EditorBar : MonoBehaviour
         _linesByBeat[3] = transform.Find("1over16").gameObject;
         _linesByBeat[4] = transform.Find("1over3").gameObject;
         _linesByBeat[5] = transform.Find("1over6").gameObject;
-        _linesByBeat[6] = transform.Find("1over9").gameObject;
+        _linesByBeat[6] = transform.Find("1over12").gameObject;
         _isShowing = true;
     }
 
