@@ -75,4 +75,16 @@ public class DataManager
         File.Copy(origin, $"{Application.dataPath}/Patterns/{name}/music.mp3");
         return isDirectoryCreated;
     }
+
+    public bool ChangePatternDirectoryName(string origin, string target)
+    {
+        if (!Directory.Exists($"{Application.dataPath}/Patterns/{target}"))
+            Directory.Move($"{Application.dataPath}/Patterns/{origin}", $"{Application.dataPath}/Patterns/{target}");
+        else
+        {
+            Debug.LogError($"Directory name \"{target}\" already exists");
+            return false;
+        }
+        return true;
+    }
 }

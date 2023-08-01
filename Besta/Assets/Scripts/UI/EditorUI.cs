@@ -12,11 +12,13 @@ public class EditorUI : MonoBehaviour
     public Slider editorPlayValueSlider;
     TMP_InputField baseBPMInputField;
     TMP_InputField offsetInputField;
+    TMP_InputField patternTitleInputField;
     TextMeshProUGUI progressPercetageText;
     TextMeshProUGUI maxComboText;
 
     void Start()
     {
+        #region UI바인딩 및 초기화
         beatChangeDropdown = GameObject.Find("BeatSelector").transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
         beatChangeDropdown.value = 5;
         noteModeChangeDropdown = GameObject.Find("NoteModeSelector").transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
@@ -31,9 +33,11 @@ public class EditorUI : MonoBehaviour
         progressPercetageText.text = "0.0%";
         maxComboText = GameObject.Find("MaxCombo").transform.Find("Value").GetComponent<TextMeshProUGUI>();
         maxComboText.text = "0";
+        patternTitleInputField = GameObject.Find("PatternNameSetting").transform.Find("InputField").GetComponent<TMP_InputField>();
+        #endregion
 
-        EditorController.PatternSettingChangeAction -= OnMaxComboChange;
-        EditorController.PatternSettingChangeAction += OnMaxComboChange;
+        EditorController.PatternMaxComboUpdateAction -= OnMaxComboChange;
+        EditorController.PatternMaxComboUpdateAction += OnMaxComboChange;
     }
 
     void Update()
@@ -113,5 +117,16 @@ public class EditorUI : MonoBehaviour
     public void OnMaxComboChange()
     {
         maxComboText.text = EditorController.totalCombo.ToString();
+    }
+
+    public void OnTitleUpdate()
+    {
+        EditorController.patternTitle = patternTitleInputField.text;
+        EditorController.PatternSettingChangeAction.Invoke();
+    }
+
+    public void OnTitleUpdateByController()
+    {
+        patternTitleInputField.text = EditorController.patternTitle.ToString();
     }
 }

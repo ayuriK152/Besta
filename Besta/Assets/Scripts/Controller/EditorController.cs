@@ -15,6 +15,8 @@ public class EditorController : MonoBehaviour
     public static Action PatternSaveAction;
     public static Action<string> PatternLoadAction;
     public static Action PatternCreateAction;
+    public static Action PatternTitleAction;
+    public static Action PatternMaxComboUpdateAction;
 
     public static EditorNoteMode editorNoteMode;
     public static Beat editorBeat;
@@ -22,6 +24,7 @@ public class EditorController : MonoBehaviour
     public static int baseBPM;
     public static int patternOffset;
     public static int totalCombo = 0;
+    public static string patternTitle;
     
     MusicPattern _musicPattern;
     double _noteTimingValue;
@@ -414,6 +417,22 @@ public class EditorController : MonoBehaviour
                 OnBarAmountChanged();
             OnPlayValueChanged(false);
         }
+
+        // 패턴 이름 변경시
+        if (_musicPattern.name != patternTitle)
+        {
+            if (Managers.Data.ChangePatternDirectoryName(_musicPattern.name, patternTitle))
+            {
+                _musicPattern.name = patternTitle;
+                SaveMusicPatternData();
+            }
+            else
+            {
+                Debug.LogError("Pattern title update fail!");
+                EditorUI uiScript = GameObject.Find("BaseCanvas").GetComponent<EditorUI>();
+                uiScript.OnTitleUpdateByController();
+            }
+        }
     }
 
     void OnBarAmountChanged()
@@ -463,13 +482,14 @@ public class EditorController : MonoBehaviour
         }
         string musicFilePath = EditorUtility.OpenFilePanel("Choose music file", "", "mp3");
         string[] directorys = musicFilePath.Split("/");
-        AudioClip loadedMusicFile = Managers.Data.LoadMusicFile(musicFilePath);
         Managers.Data.CopyMusicFilesWithCheckDirectory(musicFilePath);
         _musicPattern = new MusicPattern(directorys[directorys.Length - 1].Split(".")[0]);
         Init();
+        patternTitle = _musicPattern.name;
         EditorUI uiScript = GameObject.Find("BaseCanvas").GetComponent<EditorUI>();
         uiScript.OnOffsetChangeByController();
         uiScript.OnBaseBPMChangeByController();
+        uiScript.OnTitleUpdateByController();
         Managers.Data.SavePatternAsJson(_musicPattern, _musicPattern.name);
     }
 
@@ -484,6 +504,7 @@ public class EditorController : MonoBehaviour
         _musicPattern = tempPatternData;
         _musicPattern.ReloadMusic();
         _musicPattern.totalCombo = 0;
+        patternTitle = _musicPattern.name;
 
         // 기존 작업물 내용 삭제 과정
         for (int i = _barAmount - 1; i >= 0; i--)
@@ -545,6 +566,7 @@ public class EditorController : MonoBehaviour
         EditorUI uiScript = GameObject.Find("BaseCanvas").GetComponent<EditorUI>();
         uiScript.OnOffsetChangeByController();
         uiScript.OnBaseBPMChangeByController();
+        uiScript.OnTitleUpdateByController();
         OnPlayValueChanged(false);
     }
 
@@ -561,7 +583,7 @@ public class EditorController : MonoBehaviour
 
         _musicPattern.totalCombo += updateAmount;
         totalCombo = _musicPattern.totalCombo;
-        PatternSettingChangeAction.Invoke();
+        PatternMaxComboUpdateAction.Invoke();
         return updateAmount;
     }
 
