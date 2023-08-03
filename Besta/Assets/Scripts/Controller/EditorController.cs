@@ -281,6 +281,8 @@ public class EditorController : MonoBehaviour
 
     void EditorMouseScrollEvent(MouseScroll scrollDir)
     {
+        if (_musicPattern == null)
+            return;
         if (scrollDir == MouseScroll.Down && currentPlayValue >= 0)
         {
             if (isGridScrolling)
@@ -288,7 +290,7 @@ public class EditorController : MonoBehaviour
                 isGridScrolling = false;
                 Managers.Sound.managerAudioSource.Pause();
             }
-            currentPlayValue -= 0.005f;
+            currentPlayValue -= 1 / (float)(_barAmount * 4);
             if (currentPlayValue < 0)
                 currentPlayValue = 0;
             OnPlayValueChanged(false);
@@ -300,7 +302,7 @@ public class EditorController : MonoBehaviour
                 isGridScrolling = false;
                 Managers.Sound.managerAudioSource.Pause();
             }
-            currentPlayValue += 0.005f;
+            currentPlayValue += 1 / (float)(_barAmount * 4);
             if (currentPlayValue > 1)
                 currentPlayValue = 1;
             OnPlayValueChanged(false);
