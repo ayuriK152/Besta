@@ -53,7 +53,8 @@ public class Define
         Unknown,
         Ingame,
         MusicSelect,
-        StartMenu
+        StartMenu,
+        PatternEditor
     }
 
     public enum Judge
