@@ -79,7 +79,10 @@ public class DataManager
     public bool ChangePatternDirectoryName(string origin, string target)
     {
         if (!Directory.Exists($"{Application.dataPath}/Patterns/{target}"))
+        {
             Directory.Move($"{Application.dataPath}/Patterns/{origin}", $"{Application.dataPath}/Patterns/{target}");
+            Directory.Delete($"{Application.dataPath}/Patterns/{origin}");
+        }
         else
         {
             Debug.LogError($"Directory name \"{target}\" already exists");

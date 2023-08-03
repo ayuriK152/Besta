@@ -1,13 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SceneManagerEx
 {
+    public Define.Scene currentScene;
+
+    public void Init()
+    {
+        System.Enum.TryParse(SceneManager.GetActiveScene().name, true, out currentScene);
+        Managers.UI.UpdateUIScript();
+    }
+
     public void LoadScene(Define.Scene sceneName)
     {
         SceneManager.LoadScene(GetSceneName(sceneName));
+        System.Enum.TryParse(SceneManager.GetActiveScene().name, true, out currentScene);
+        Managers.UI.UpdateUIScript();
     }
 
     public string GetSceneName(Define.Scene sceneName)

@@ -12,12 +12,14 @@ public class Managers : MonoBehaviour
     private static DataManager _data = new DataManager();
     private static IngameManager _game = new IngameManager();
     private static SceneManagerEx _scene = new SceneManagerEx();
+    private static UIManager _ui = new UIManager();
 
     public static InputManager Input { get { return _input; } }
     public static SoundManager Sound { get { return _sound; } }
     public static DataManager Data { get { return _data; } }
     public static IngameManager Game { get { return _game; } }
     public static SceneManagerEx Scene { get { return _scene; } }
+    public static UIManager UI { get { return _ui; } }
 
     void Awake()
     {
@@ -26,8 +28,8 @@ public class Managers : MonoBehaviour
 
     void Update()
     {
-        _input.OnUpdate();
-        _game.OnUpdate();
+        Input.OnUpdate();
+        Game.OnUpdate();
     }
 
     static void Init()
@@ -45,6 +47,7 @@ public class Managers : MonoBehaviour
             _managerInstance = go.GetComponent<Managers>();
         }
 
-        _sound.Init();
+        Sound.Init();
+        Scene.Init();
     }
 }
