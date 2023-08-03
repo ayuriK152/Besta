@@ -39,6 +39,7 @@ public class EditorController : MonoBehaviour
     GameObject _currentNote;
     List<GameObject> _instantiatedEditorBars = new List<GameObject>();
     List<GameObject> _instantiatedEditorNotes = new List<GameObject>();
+    EditorUI uiScript;
 
     public static Vector3 barUpperLimitPos;
     public static Vector3 barLowerLimitPos;
@@ -62,6 +63,7 @@ public class EditorController : MonoBehaviour
         _barInstatiatePoint = GameObject.Find("Grid");
         _editorNote = Resources.Load<GameObject>("Prefabs/EditorNote");
         _editorBar = Resources.Load<GameObject>("Prefabs/EditorBar");
+        uiScript = Managers.UI.currentSceneUI as EditorUI;
 
         // 대리자 초기화
         ActionInit();
@@ -349,6 +351,7 @@ public class EditorController : MonoBehaviour
             else
                 Managers.Sound.managerAudioSource.timeSamples = tempSample - 1;
         }
+        uiScript.TimeProgressUIUpdate();
     }
 
     void OnSettingValueChanged()
@@ -488,10 +491,10 @@ public class EditorController : MonoBehaviour
         _musicPattern = new MusicPattern(directorys[directorys.Length - 1].Split(".")[0]);
         Init();
         patternTitle = _musicPattern.name;
-        EditorUI uiScript = GameObject.Find("BaseCanvas").GetComponent<EditorUI>();
         uiScript.OnOffsetChangeByController();
         uiScript.OnBaseBPMChangeByController();
         uiScript.OnTitleUpdateByController();
+        uiScript.OriginTimeUIUpdate();
         Managers.Data.SavePatternAsJson(_musicPattern, _musicPattern.name);
     }
 
@@ -565,10 +568,10 @@ public class EditorController : MonoBehaviour
         }
 
         Debug.Log($"{_musicPattern.totalCombo}");
-        EditorUI uiScript = GameObject.Find("BaseCanvas").GetComponent<EditorUI>();
         uiScript.OnOffsetChangeByController();
         uiScript.OnBaseBPMChangeByController();
         uiScript.OnTitleUpdateByController();
+        uiScript.OriginTimeUIUpdate();
         OnPlayValueChanged(false);
     }
 

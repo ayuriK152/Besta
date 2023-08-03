@@ -13,6 +13,8 @@ public class EditorUI : MonoBehaviour
     TMP_InputField baseBPMInputField;
     TMP_InputField offsetInputField;
     TMP_InputField patternTitleInputField;
+    TextMeshProUGUI originTimeText;
+    TextMeshProUGUI progressTimeText;
     TextMeshProUGUI progressPercetageText;
     TextMeshProUGUI maxComboText;
 
@@ -29,6 +31,8 @@ public class EditorUI : MonoBehaviour
         baseBPMInputField.text = EditorController.baseBPM.ToString();
         offsetInputField = GameObject.Find("OffsetSetting").transform.Find("InputField").GetComponent<TMP_InputField>();
         offsetInputField.text = EditorController.patternOffset.ToString();
+        originTimeText = GameObject.Find("TimeProgress").transform.Find("Origin").GetComponent<TextMeshProUGUI>();
+        progressTimeText = GameObject.Find("TimeProgress").transform.Find("Current").GetComponent<TextMeshProUGUI>();
         progressPercetageText = GameObject.Find("Progress").transform.Find("Value").GetComponent<TextMeshProUGUI>();
         progressPercetageText.text = "0.0%";
         maxComboText = GameObject.Find("MaxCombo").transform.Find("Value").GetComponent<TextMeshProUGUI>();
@@ -128,5 +132,49 @@ public class EditorUI : MonoBehaviour
     public void OnTitleUpdateByController()
     {
         patternTitleInputField.text = EditorController.patternTitle.ToString();
+    }
+
+    public void OriginTimeUIUpdate()
+    {
+        int sec = Managers.Sound.managerAudioSource.clip.samples / Managers.Sound.managerAudioSource.clip.frequency;
+        int ms = (int)((Managers.Sound.managerAudioSource.clip.samples - Managers.Sound.managerAudioSource.clip.frequency * sec) / (float)Managers.Sound.managerAudioSource.clip.frequency * 1000);
+        int min = sec / 60;
+        sec -= min * 60;
+        if (min / 10 > 0)
+            originTimeText.text = $" / {min}.";
+        else
+            originTimeText.text = $" / 0{min}.";
+        if (sec / 10 > 0)
+            originTimeText.text += $"{sec}:";
+        else
+            originTimeText.text += $"0{sec}:";
+        if (ms / 100 > 0)
+            originTimeText.text += $"{ms}";
+        else if (ms / 10 > 0)
+            originTimeText.text += $"0{ms}";
+        else
+            originTimeText.text += $"00{ms}";
+    }
+
+    public void TimeProgressUIUpdate()
+    {
+        int sec = Managers.Sound.managerAudioSource.timeSamples / Managers.Sound.managerAudioSource.clip.frequency;
+        int ms = (int)((Managers.Sound.managerAudioSource.timeSamples - Managers.Sound.managerAudioSource.clip.frequency * sec) / (float)Managers.Sound.managerAudioSource.clip.frequency * 1000);
+        int min = sec / 60;
+        sec -= min * 60;
+        if (min / 10 > 0)
+            progressTimeText.text = $"{min}.";
+        else
+            progressTimeText.text = $"0{min}.";
+        if (sec / 10 > 0)
+            progressTimeText.text += $"{sec}:";
+        else
+            progressTimeText.text += $"0{sec}:";
+        if (ms / 100 > 0)
+            progressTimeText.text += $"{ms}";
+        else if (ms / 10 > 0)
+            progressTimeText.text += $"0{ms}";
+        else
+            progressTimeText.text += $"00{ms}";
     }
 }
