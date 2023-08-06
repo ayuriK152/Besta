@@ -138,13 +138,14 @@ public class GameController : MonoBehaviour
         {
             laneNoteDatas[lane].Dequeue();
             Destroy(laneNotes[lane].Dequeue());
+            StartCoroutine(JudgingInput(timing, lane));
         }
         else
         {
             holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data.startTiming;
             holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
+            StartCoroutine(JudgingLongNoteInput(timing, lane));
         }
-        StartCoroutine(JudgingInput(timing, lane));
     }
 
     public void PlayerKeyPress(KeyCode key)
@@ -208,7 +209,7 @@ public class GameController : MonoBehaviour
             holdingSampleAmout[lane] = 0;
             laneNoteDatas[lane].Dequeue();
             Destroy(laneNotes[lane].Dequeue());
-            StartCoroutine(JudgingInput(tempDiff, lane));
+            StartCoroutine(JudgingLongNoteInput(tempDiff, lane));
         }
         yield return null;
     }
@@ -233,7 +234,6 @@ public class GameController : MonoBehaviour
             gainedAcc += 3;
             Managers.Game.currentCombo += 1;
             JudgeAction.Invoke(Judge.Besta, diff);
-            longnoteStartJudge[lane] = Judge.Besta;
         }
         else if (diff <= 0.1 && diff >= -0.1)
         {
@@ -241,7 +241,34 @@ public class GameController : MonoBehaviour
             gainedAcc += 2;
             Managers.Game.currentCombo += 1;
             JudgeAction.Invoke(Judge.Good, diff);
-            longnoteStartJudge[lane] = Judge.Good;
+        }
+        else if (diff <= 0.16667 && diff >= -0.16667)
+        {
+            Debug.Log("Bad");
+            gainedAcc += 1;
+            Managers.Game.currentCombo += 1;
+            JudgeAction.Invoke(Judge.Bad, diff);
+        }
+        else
+        {
+            Debug.LogWarning("Miss");
+            gainedAcc += 0;
+            Managers.Game.currentCombo = 0;
+            JudgeAction.Invoke(Judge.Miss, diff);
+        }
+        StartCoroutine(CalcScore());
+        yield return null;
+    }
+    IEnumerator JudgingLongNoteInput(double diff, int lane)
+    {
+        perfectAcc += 3;
+        if (diff <= 0.1 && diff >= -0.1)
+        {
+            Debug.Log("Besta");
+            gainedAcc += 3;
+            Managers.Game.currentCombo += 1;
+            JudgeAction.Invoke(Judge.Besta, diff);
+            longnoteStartJudge[lane] = Judge.Besta;
         }
         else if (diff <= 0.16667 && diff >= -0.16667)
         {
