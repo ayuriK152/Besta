@@ -314,6 +314,7 @@ public class EditorController : MonoBehaviour
     void EditorGridScroll()
     {
         currentPlayValue = (float)Managers.Sound.managerAudioSource.timeSamples / Managers.Sound.managerAudioSource.clip.samples;
+        _barInstatiatePoint.transform.Translate(new Vector3(0, -(Managers.Sound.managerAudioSource.clip.frequency / (float)_timingValuePerBar) * 4.8f, 0) * Time.deltaTime);
         OnPlayValueChanged(false);
         if (!Managers.Sound.managerAudioSource.isPlaying)
         {
@@ -339,7 +340,8 @@ public class EditorController : MonoBehaviour
 
     void OnPlayValueChanged(bool callByUI)
     {
-        _barInstatiatePoint.transform.localPosition = new Vector3(0, -currentPlayValue * _editorBarMaxPosition - (patternOffset / ((float)_timingValuePerBar)) * 4.8f, 0);
+        if (!isGridScrolling)
+            _barInstatiatePoint.transform.localPosition = new Vector3(0, -currentPlayValue * _editorBarMaxPosition - (patternOffset / ((float)_timingValuePerBar)) * 4.8f, 0);
         if (!callByUI)
             isPlayValueChanged = true;
         else

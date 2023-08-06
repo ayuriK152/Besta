@@ -14,7 +14,6 @@ public class GameController : MonoBehaviour
 
     float _barSampleAmount;
     double diff;
-    double diffUpdatesAlways;
     float[] holdingSampleAmout = new float[4];
     Judge[] longnoteStartJudge = new Judge[4];
     bool[] holdingCheck = new bool[4];
@@ -81,7 +80,7 @@ public class GameController : MonoBehaviour
     IEnumerator CheckMissingNote(int lane)
     {
         lane -= 1;
-        diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset);
+        double diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset);
         if (!laneNoteDatas[lane].Peek().data.isLongNote && (laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667)
         {
             Destroy(laneNotes[lane].Dequeue());
