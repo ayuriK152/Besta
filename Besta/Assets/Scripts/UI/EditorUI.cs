@@ -1,3 +1,4 @@
+using SFB;
 using System;
 using TMPro;
 using UnityEditor;
@@ -110,7 +111,12 @@ public class EditorUI : MonoBehaviour
 
     public void OnLoadButtonClick()
     {
-        EditorController.PatternLoadAction.Invoke(EditorUtility.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Patterns", "json"));
+#if UNITY_EDITOR
+        //EditorController.PatternLoadAction.Invoke(EditorUtility.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Patterns", "json"));
+        EditorController.PatternLoadAction.Invoke(StandaloneFileBrowser.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Patterns", "json", false)[0]);
+#elif UNITY_STANDALONE_WIN
+        EditorController.PatternLoadAction.Invoke(StandaloneFileBrowser.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Patterns", "json", false)[0]);
+#endif
     }
 
     public void OnCreateButtonClick()
