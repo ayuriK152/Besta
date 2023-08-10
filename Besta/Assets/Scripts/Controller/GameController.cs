@@ -13,12 +13,12 @@ public class GameController : MonoBehaviour
     SpriteRenderer[] lanePressEffects = new SpriteRenderer[4];
 
     float _barSampleAmount;
-    double diff;
     float[] holdingSampleAmout = new float[4];
     Judge[] longnoteStartJudge = new Judge[4];
     bool[] holdingCheck = new bool[4];
     int gainedAcc = 0, perfectAcc = 0;
     int passedNote;
+    float scrollSpeed = 4;
 
     public static bool isPlaying;
 
@@ -112,39 +112,41 @@ public class GameController : MonoBehaviour
         switch (key)
         {
             case KeyCode.S:
-                NoteProcessKeyDown((int)LaneNumber.First - 1, timing);
+                StartCoroutine(NoteProcessKeyDown((int)LaneNumber.First - 1, timing));
                 break;
             case KeyCode.D:
-                NoteProcessKeyDown((int)LaneNumber.Second - 1, timing);
+                StartCoroutine(NoteProcessKeyDown((int)LaneNumber.Second - 1, timing));
                 break;
             case KeyCode.L:
-                NoteProcessKeyDown((int)LaneNumber.Third - 1, timing);
+                StartCoroutine(NoteProcessKeyDown((int)LaneNumber.Third - 1, timing));
                 break;
             case KeyCode.Semicolon:
-                NoteProcessKeyDown((int)LaneNumber.Fourth - 1, timing);
+                StartCoroutine(NoteProcessKeyDown((int)LaneNumber.Fourth - 1, timing));
                 break;
         }
     }
 
-    void NoteProcessKeyDown(int lane, double timing)
+    IEnumerator NoteProcessKeyDown(int lane, double timing)
     {
         holdingCheck[lane] = true;
         lanePressEffects[lane].enabled = true;
         timing = (laneNoteDatas[lane].Peek().data.startTiming + timing) / Managers.Sound.managerAudioSource.clip.frequency;
-        if (timing > 0.2)
-            return;
-        if (!laneNoteDatas[lane].Peek().data.isLongNote)
+        if (timing <= 0.2)
         {
-            laneNoteDatas[lane].Dequeue();
-            Destroy(laneNotes[lane].Dequeue());
-            StartCoroutine(JudgingInput(timing, lane));
+            if (!laneNoteDatas[lane].Peek().data.isLongNote)
+            {
+                laneNoteDatas[lane].Dequeue();
+                Destroy(laneNotes[lane].Dequeue());
+                StartCoroutine(JudgingInput(timing, lane));
+            }
+            else
+            {
+                holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data.startTiming;
+                holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
+                StartCoroutine(JudgingLongNoteInput(timing, lane));
+            }
         }
-        else
-        {
-            holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data.startTiming;
-            holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
-            StartCoroutine(JudgingLongNoteInput(timing, lane));
-        }
+        yield return null;
     }
 
     public void PlayerKeyPress(KeyCode key)
@@ -291,12 +293,12 @@ public class GameController : MonoBehaviour
 
     void ScrollPattern()
     {
-        patternObject.transform.Translate(new Vector3(0, -Managers.Sound.managerAudioSource.clip.frequency / _barSampleAmount * 4.8f, 0) * 3 * Time.deltaTime);
+        patternObject.transform.Translate(new Vector3(0, -Managers.Sound.managerAudioSource.clip.frequency / _barSampleAmount * 4.8f, 0) * scrollSpeed * Time.deltaTime);
         if (isPlaying && !Managers.Sound.managerAudioSource.isPlaying)
         {
-            if (-patternObject.transform.localPosition.y / (4.8f * 3) >= 2 && (_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * 3 * 2)) / (4.8f * 3)) >= Managers.Game.currentLoadedPattern.songOffset))
+            if (-patternObject.transform.localPosition.y / (4.8f * 5) >= 2 && (_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * scrollSpeed * 2)) / (4.8f * scrollSpeed)) >= Managers.Game.currentLoadedPattern.songOffset))
             {
-                Managers.Sound.managerAudioSource.timeSamples = (int)(_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * 3 * 2)) / (4.8f * 3)) - Managers.Game.currentLoadedPattern.songOffset);
+                Managers.Sound.managerAudioSource.timeSamples = (int)(_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * scrollSpeed * 2)) / (4.8f * scrollSpeed)) - Managers.Game.currentLoadedPattern.songOffset);
                 Managers.Sound.managerAudioSource.Play();
             }
         }
@@ -324,12 +326,12 @@ public class GameController : MonoBehaviour
                     break;
             }
             // yPos 값을 계산하는 수식의 마지막 인수는 유저의 개인 설정 스크롤 속도가 되어야 한다. 임시 방편으로 보기 좋기 위해 3으로 설정해 뒀으므로 관련 수정 필요.
-            float yPos = (n.startTiming / _barSampleAmount * 4.8f * 3) + 4.8f * 3 * 2;
+            float yPos = (n.startTiming / _barSampleAmount * 4.8f * scrollSpeed) + 4.8f * scrollSpeed * 2;
             currentNote.transform.localPosition = new Vector2(0, yPos + 0.125f);
             if (n.isLongNote)
             {
                 float legacyPos = yPos;
-                yPos = (n.endTiming / _barSampleAmount * 4.8f * 3) + 4.8f * 3 * 2;
+                yPos = (n.endTiming / _barSampleAmount * 4.8f * scrollSpeed) + 4.8f * scrollSpeed * 2;
                 GameNote tempGameNoteData = currentNote.GetComponent<GameNote>();
                 tempGameNoteData.longNotePole.SetActive(true);
                 tempGameNoteData.longNotePole.SetActive(true);

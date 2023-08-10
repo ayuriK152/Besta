@@ -9,7 +9,7 @@ public class EditorNote : MonoBehaviour
     public GameObject longNotePole { get { return _longNotePole; } }
     GameObject _endPoint;
     public GameObject endPoint { get { return _endPoint; } }
-
+    
     void Awake()
     {
         _startPoint = transform.Find("Start").gameObject;
