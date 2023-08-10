@@ -10,8 +10,7 @@ public class MusicSelectUI : MonoBehaviour
     public void OnTempLoadClick()
     {
 #if UNITY_EDITOR
-        //Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(EditorUtility.OpenFilePanel("Choose music pattern","","json"));
-        Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(StandaloneFileBrowser.OpenFilePanel("Choose music pattern", "", "json", false)[0]);
+        Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(EditorUtility.OpenFilePanel("Choose music pattern","","json"));
 #elif UNITY_STANDALONE_WIN
         Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(StandaloneFileBrowser.OpenFilePanel("Choose music pattern","","json", false)[0]);
 #endif

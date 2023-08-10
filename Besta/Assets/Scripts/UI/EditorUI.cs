@@ -112,8 +112,7 @@ public class EditorUI : MonoBehaviour
     public void OnLoadButtonClick()
     {
 #if UNITY_EDITOR
-        //EditorController.PatternLoadAction.Invoke(EditorUtility.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Patterns", "json"));
-        EditorController.PatternLoadAction.Invoke(StandaloneFileBrowser.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Patterns", "json", false)[0]);
+        EditorController.PatternLoadAction.Invoke(EditorUtility.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Patterns", "json"));
 #elif UNITY_STANDALONE_WIN
         EditorController.PatternLoadAction.Invoke(StandaloneFileBrowser.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Patterns", "json", false)[0]);
 #endif

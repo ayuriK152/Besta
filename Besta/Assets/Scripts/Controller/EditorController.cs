@@ -489,8 +489,7 @@ public class EditorController : MonoBehaviour
             // 이미 작업중이던 채보가 존재하는 경우 해당 채보를 저장할 것인지 물어본 후 저장 여부를 결정하는 기능 추가 요망
         }
 #if UNITY_EDITOR
-        //string musicFilePath = EditorUtility.OpenFilePanel("Choose music file", "", "mp3");
-        string musicFilePath = StandaloneFileBrowser.OpenFilePanel("Choose music file", "", "mp3", false)[0];
+        string musicFilePath = EditorUtility.OpenFilePanel("Choose music file", "", "mp3");
 #elif UNITY_STANDALONE_WIN
         string musicFilePath = StandaloneFileBrowser.OpenFilePanel("Choose music file", "", "mp3", false)[0];
 #endif
