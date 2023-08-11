@@ -38,6 +38,7 @@ public class Datas
     {
         public AudioClip musicSource;
         public string name;
+        public string artist;
         public int bpm;
         public int songOffset;
         public int songLength;
@@ -59,5 +60,12 @@ public class Datas
         {
             musicSource = Managers.Data.LoadMusicFile($"{Application.dataPath}/Patterns/{name}/music.mp3");
         }
+    }
+
+    public class MusicInfo
+    {
+        public string name;
+        public string artist;
+        public int bpm;
     }
 }
