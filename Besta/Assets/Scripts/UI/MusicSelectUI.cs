@@ -1,21 +1,19 @@
-using SFB;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+using TMPro;
 using UnityEngine;
-using static Datas;
+using UnityEngine.UI;
 
 public class MusicSelectUI : MonoBehaviour
 {
-    public void OnTempLoadClick()
+    public Image currentImage;
+    public TextMeshProUGUI currentName;
+    public TextMeshProUGUI currentArtist;
+    public TextMeshProUGUI currentBPM;
+
+    private void Awake()
     {
-#if UNITY_EDITOR
-        Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(EditorUtility.OpenFilePanel("Choose music pattern","","json"));
-#elif UNITY_STANDALONE_WIN
-        Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(StandaloneFileBrowser.OpenFilePanel("Choose music pattern","","json", false)[0]);
-#endif
-        Managers.Game.currentLoadedPattern.ReloadMusic();
-        Managers.Sound.managerAudioSource.clip = Managers.Game.currentLoadedPattern.musicSource;
-        Managers.Scene.LoadScene(Define.Scene.Ingame);
+        currentImage = transform.Find("MusicDetailPreview").Find("CurrentImage").GetComponent<Image>();
+        currentName = transform.Find("MusicDetailPreview").Find("CurrentName").GetComponent<TextMeshProUGUI>();
+        currentArtist = transform.Find("MusicDetailPreview").Find("CurrentArtist").GetComponent<TextMeshProUGUI>();
+        currentBPM = transform.Find("MusicDetailPreview").Find("CurrentBPM").GetComponent<TextMeshProUGUI>();
     }
 }

@@ -4,8 +4,22 @@ using UnityEngine;
 
 public class DataManager
 {
+    // 채보 에디터의 작업물 저장은 어차피 외부 디렉토리에 되어야함. 수정 불필요
     public void SavePatternAsJson<T>(T obj, string patternName)
     {
+#if UNITY_EDITOR
+        if (!Directory.Exists($"{Application.dataPath}/Resources/Patterns/"))
+        {
+            Directory.CreateDirectory($"{Application.dataPath}/Resources/Patterns/");
+            Debug.Log("Pattern directory does not exists, Pattern directory is added automatically");
+        }
+        if (!Directory.Exists($"{Application.dataPath}/Resources/Patterns/{patternName}"))
+        {
+            Directory.CreateDirectory($"{Application.dataPath}/Resources/Patterns/{patternName}");
+            Debug.Log("This pattern's directory does not exists, Pattern directory is added automatically");
+        }
+        File.WriteAllText($"{Application.dataPath}/Resources/Patterns/{patternName}/data.json", JsonUtility.ToJson(obj));
+#elif PLATFORM_STANDALONE_WIN
         if (!Directory.Exists($"{Application.dataPath}/Patterns/"))
         {
             Directory.CreateDirectory($"{Application.dataPath}/Patterns/");
@@ -17,6 +31,7 @@ public class DataManager
             Debug.Log("This pattern's directory does not exists, Pattern directory is added automatically");
         }
         File.WriteAllText($"{Application.dataPath}/Patterns/{patternName}/data.json", JsonUtility.ToJson(obj));
+#endif
         Debug.Log("File saved succesfully!");
     }
 
@@ -37,6 +52,23 @@ public class DataManager
         }
     }
 
+    public T LoadJsonData<T>(TextAsset data)
+    {
+        string loadedText;
+        try
+        {
+            loadedText = data.ToString();
+            T loadedData = JsonUtility.FromJson<T>(loadedText);
+            Debug.Log("File loaded successfully!");
+            return loadedData;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"File load failed");
+            return default(T);
+        }
+    }
+
     public AudioClip LoadMusicFile(string path)
     {
         WWW uri = new WWW(path);
@@ -52,6 +84,19 @@ public class DataManager
             Debug.Log("Failed to load music file!");
             return null;
         }
+    }
+
+    public Texture2D LoadImageFile(string path)
+    {
+        byte[] textureBytes = File.ReadAllBytes(path);
+        if (textureBytes == null)
+        {
+            Debug.LogError("Image file load fail!");
+            return null;
+        }
+        Texture2D loadedTexture = new Texture2D(0, 0);
+        loadedTexture.LoadImage(textureBytes);
+        return loadedTexture;
     }
 
     public bool CopyMusicFilesWithCheckDirectory(string origin)

@@ -50,7 +50,7 @@ public class Datas
             bpm = 120;
             songOffset = 0;
             name = _name;
-            musicSource = Managers.Data.LoadMusicFile($"{Application.dataPath}/Patterns/{name}/music.mp3");
+            ReloadMusic();
             songLength = songOffset + musicSource.samples;
             noteDatas = new List<Note>();
             totalCombo = 0;
@@ -58,14 +58,14 @@ public class Datas
 
         public void ReloadMusic()
         {
-            musicSource = Managers.Data.LoadMusicFile($"{Application.dataPath}/Patterns/{name}/music.mp3");
+#if UNITY_EDITOR
+            musicSource = Managers.Data.LoadMusicFile($"{Application.dataPath}/Resources/Patterns/{name}/music.mp3");
+#elif UNITY_STANDALONE_WIN
+            if (Managers.Scene.currentScene == Scene.PatternEditor)
+                musicSource = Managers.Data.LoadMusicFile($"{Application.dataPath}/Patterns/{name}/music.mp3");
+            else
+                musicSource = Resources.Load<AudioClip>($"Patterns/{name}/music");
+#endif
         }
-    }
-
-    public class MusicInfo
-    {
-        public string name;
-        public string artist;
-        public int bpm;
     }
 }
