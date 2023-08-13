@@ -1,5 +1,4 @@
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using static Datas;
@@ -22,6 +21,7 @@ public class MusicPanel : MonoBehaviour
         artistUI = transform.Find("TextArea").Find("Artist").GetComponent<TextMeshProUGUI>();
         albumArt = transform.Find("Image").GetComponent<Image>();
         ui = Managers.UI.currentSceneUI as MusicSelectUI;
+        Managers.Sound.managerAudioSource.loop = true;
     }
 
     public void OnClickSelectButton()
@@ -30,6 +30,7 @@ public class MusicPanel : MonoBehaviour
         if (Managers.Sound.managerAudioSource.clip == tempMusic)
         {
             Managers.Sound.managerAudioSource.Stop();
+            Managers.Sound.managerAudioSource.loop = false;
             Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(Resources.Load<TextAsset>($"Patterns/{name}/data"));
             Managers.Game.currentLoadedPattern.ReloadMusic();
             Managers.Sound.managerAudioSource.clip = Managers.Game.currentLoadedPattern.musicSource;

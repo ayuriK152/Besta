@@ -11,12 +11,17 @@ public class MusicSelectController : MonoBehaviour
 
     public static Coroutine fadeinCoroutine;
 
+    MusicSelectUI ui;
+
     void Start()
     {
         musicListInstantiateObject = GameObject.Find("Content");
         musicPanelPrefab = Resources.Load<GameObject>("Prefabs/MusicPanel");
         Object[] datas = Resources.LoadAll("Patterns", typeof(TextAsset));
         List<MusicPattern> tempPatternList = new List<MusicPattern>();
+
+        ui = Managers.UI.currentSceneUI as MusicSelectUI;
+
         foreach (Object d in datas)
             tempPatternList.Add(Managers.Data.LoadJsonData<MusicPattern>(d as TextAsset));
         foreach (MusicPattern p in tempPatternList)
@@ -28,6 +33,10 @@ public class MusicSelectController : MonoBehaviour
             musicList[musicList.Count - 1].UpdateInfo();
         }
         musicList[0].OnClickSelectButton();
+
+        Managers.Input.KeyDownAction = null;
+        Managers.Input.KeyDownAction -= PlayerKeyDown;
+        Managers.Input.KeyDownAction += PlayerKeyDown;
     }
 
     public static IEnumerator MusicPreviewFadein()
@@ -36,9 +45,24 @@ public class MusicSelectController : MonoBehaviour
         while (currentTime < 1)
         {
             currentTime += Time.deltaTime;
-            Managers.Sound.managerAudioSource.volume = Mathf.Lerp(0, 0.3f, currentTime / 1);
+            Managers.Sound.managerAudioSource.volume = Mathf.Lerp(0, PlayerPrefs.GetFloat("MusicSoundValue"), currentTime / 1);
             yield return null;
         }
         yield break;
+    }
+
+    void PlayerKeyDown(KeyCode key)
+    {
+        switch (key)
+        {
+            case KeyCode.F3:
+                if (!ui.optionUIObj.activeSelf)
+                    ui.optionUIObj.active = true;
+                break;
+            case KeyCode.Escape:
+                if (ui.optionUIObj.activeSelf)
+                    ui.optionUIObj.active = false;
+                break;
+        }
     }
 }

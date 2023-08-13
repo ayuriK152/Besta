@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class DataManager
 {
+    public void Init()
+    {
+        PlayerOptionInit();
+    }
+
     // 채보 에디터의 작업물 저장은 어차피 외부 디렉토리에 되어야함. 수정 불필요
     public void SavePatternAsJson<T>(T obj, string patternName)
     {
@@ -134,5 +139,15 @@ public class DataManager
             return false;
         }
         return true;
+    }
+
+    public void PlayerOptionInit()
+    {
+        if (!PlayerPrefs.HasKey("MusicSoundValue"))
+            PlayerPrefs.SetFloat("MusicSoundValue", 0.5f);
+        Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetFloat("MusicSoundValue");
+
+        if (!PlayerPrefs.HasKey("EffectSoundValue"))
+            PlayerPrefs.SetFloat("EffectSoundValue", 0.5f);
     }
 }

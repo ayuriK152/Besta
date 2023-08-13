@@ -20,21 +20,22 @@ public class InputManager
         if (KeyDownAction != null)
         {
             if (Input.GetKeyDown(KeyCode.S))
-            {
                 KeyDownAction.Invoke(KeyCode.S);
-            }
+
             if (Input.GetKeyDown(KeyCode.D))
-            {
                 KeyDownAction.Invoke(KeyCode.D);
-            }
+
             if (Input.GetKeyDown(KeyCode.L))
-            {
                 KeyDownAction.Invoke(KeyCode.L);
-            }
+
             if (Input.GetKeyDown(KeyCode.Semicolon))
-            {
                 KeyDownAction.Invoke(KeyCode.Semicolon);
-            }
+
+            if (Input.GetKeyDown(KeyCode.F3))
+                KeyDownAction.Invoke(KeyCode.F3);
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+                KeyDownAction.Invoke(KeyCode.Escape);
         }
 
         if (KeyPressAction != null)

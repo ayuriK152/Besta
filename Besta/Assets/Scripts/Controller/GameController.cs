@@ -46,10 +46,13 @@ public class GameController : MonoBehaviour
         }
         Array.Fill(holdingSampleAmout, 0);
 
+        Managers.Input.KeyDownAction = null;
         Managers.Input.KeyDownAction -= PlayerKeyDown;
         Managers.Input.KeyDownAction += PlayerKeyDown;
+        Managers.Input.KeyPressAction = null;
         Managers.Input.KeyPressAction -= PlayerKeyPress;
         Managers.Input.KeyPressAction += PlayerKeyPress;
+        Managers.Input.KeyUpAction = null;
         Managers.Input.KeyUpAction -= PlayerKeyUp;
         Managers.Input.KeyUpAction += PlayerKeyUp;
 

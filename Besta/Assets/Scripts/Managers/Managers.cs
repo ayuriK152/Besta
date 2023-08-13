@@ -49,5 +49,6 @@ public class Managers : MonoBehaviour
 
         Sound.Init();
         Scene.Init();
+        Data.Init();
     }
 }
