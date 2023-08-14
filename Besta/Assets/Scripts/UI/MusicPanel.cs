@@ -29,8 +29,11 @@ public class MusicPanel : MonoBehaviour
         AudioClip tempMusic = Resources.Load<AudioClip>($"Patterns/{name}/music");
         if (Managers.Sound.managerAudioSource.clip == tempMusic)
         {
+            if (MusicSelectController.fadeinCoroutine != null)
+                StopCoroutine(MusicSelectController.fadeinCoroutine);
             Managers.Sound.managerAudioSource.Stop();
             Managers.Sound.managerAudioSource.loop = false;
+            Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetFloat("MusicSoundValue");
             Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(Resources.Load<TextAsset>($"Patterns/{name}/data"));
             Managers.Game.currentLoadedPattern.ReloadMusic();
             Managers.Sound.managerAudioSource.clip = Managers.Game.currentLoadedPattern.musicSource;
