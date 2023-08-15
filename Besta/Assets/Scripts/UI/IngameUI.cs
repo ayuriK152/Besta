@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Define;
 
@@ -15,6 +16,8 @@ public class IngameUI : MonoBehaviour
     Coroutine judgeTextCoroutine;
     Coroutine timingDiffTextCoroutine;
 
+    Animator comboTextAnimator;
+
     void Start()
     {
         judgeText = GameObject.Find("JudgeText").GetComponent<TextMeshProUGUI>();
@@ -23,6 +26,8 @@ public class IngameUI : MonoBehaviour
         scoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
         scoreText.text = "0";
         maxcomboText = GameObject.Find("MaxComboText").GetComponent<TextMeshProUGUI>();
+
+        comboTextAnimator = GameObject.Find("ComboText").GetComponent<Animator>();
 
         GameController.JudgeAction -= OnJudgeTriggered;
         GameController.JudgeAction += OnJudgeTriggered;
@@ -37,7 +42,13 @@ public class IngameUI : MonoBehaviour
 
     public void OnJudgeTriggered(Judge judge, double timingDiff)
     {
-        comboText.text = $"{Managers.Game.currentCombo}";
+        if (Managers.Game.currentCombo == 0)
+            comboText.text = "";
+        else
+        {
+            comboText.text = $"{Managers.Game.currentCombo}";
+            comboTextAnimator.Play("ComboUpdate", -1, 0);
+        }
         switch (judge)
         {
             case Judge.Besta:
