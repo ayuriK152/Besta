@@ -91,18 +91,19 @@ public class GameController : MonoBehaviour
         }
         else if (laneNoteDatas[lane].Peek().data.isLongNote)
         {
-            if ((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667 && holdingSampleAmout[lane] == 0)
-            {
-                passedNote += 1;
-                Destroy(laneNotes[lane].Dequeue());
-                holdingSampleAmout[lane] = 0;
-                StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency, lane));
-            }
             if ((laneNoteDatas[lane].Peek().data.endTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667)
             {
                 Destroy(laneNotes[lane].Dequeue());
                 holdingSampleAmout[lane] = 0;
                 StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.endTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency, lane));
+            }
+            else if ((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667 && holdingSampleAmout[lane] == 0)
+            {
+                passedNote += 1;
+                perfectAcc += 3;
+                Destroy(laneNotes[lane].Dequeue());
+                holdingSampleAmout[lane] = 0;
+                StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency, lane));
             }
         }
 
@@ -256,7 +257,6 @@ public class GameController : MonoBehaviour
         else
         {
             Debug.LogWarning("Miss");
-            gainedAcc += 0;
             Managers.Game.currentCombo = 0;
             JudgeAction.Invoke(Judge.Miss, diff);
         }
