@@ -1,9 +1,8 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 using static Define;
 
 public class IngameUI : MonoBehaviour
@@ -13,10 +12,15 @@ public class IngameUI : MonoBehaviour
     TextMeshProUGUI comboText;
     TextMeshProUGUI scoreText;
     TextMeshProUGUI maxcomboText;
+    TextMeshProUGUI musicNameText;
+    TextMeshProUGUI artistNameText;
+    TextMeshProUGUI etcText;
+    Image jacketImage;
     Coroutine judgeTextCoroutine;
     Coroutine timingDiffTextCoroutine;
 
     Animator comboTextAnimator;
+    public Animator introMusicInfoAnimator;
 
     void Start()
     {
@@ -26,18 +30,31 @@ public class IngameUI : MonoBehaviour
         scoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
         scoreText.text = "0";
         maxcomboText = GameObject.Find("MaxComboText").GetComponent<TextMeshProUGUI>();
+        jacketImage = GameObject.Find("IngameMusicInfo").transform.Find("Image").GetComponent<Image>();
+        jacketImage.sprite = Resources.Load<Sprite>($"Patterns/{Managers.Game.currentLoadedPattern.name}/image");
+        musicNameText = GameObject.Find("IngameMusicInfo").transform.Find("Panel").Find("MusicName").GetComponent<TextMeshProUGUI>();
+        musicNameText.text = Managers.Game.currentLoadedPattern.name;
+        artistNameText = GameObject.Find("IngameMusicInfo").transform.Find("Panel").Find("ArtistName").GetComponent<TextMeshProUGUI>();
+        artistNameText.text = Managers.Game.currentLoadedPattern.artist;
+        etcText = GameObject.Find("IngameMusicInfo").transform.Find("Panel").Find("Etc").GetComponent<TextMeshProUGUI>();
+        etcText.text = $"BPM - {Managers.Game.currentLoadedPattern.bpm} | Design - ayuriK";
 
         comboTextAnimator = GameObject.Find("ComboText").GetComponent<Animator>();
+        introMusicInfoAnimator = GameObject.Find("IngameMusicInfo").GetComponent<Animator>();
 
         GameController.JudgeAction -= OnJudgeTriggered;
         GameController.JudgeAction += OnJudgeTriggered;
         GameController.ScoreUpdateAction -= OnScoreUpdate;
         GameController.ScoreUpdateAction += OnScoreUpdate;
+        StartCoroutine(IngameIntro());
     }
 
-    public void OnStartButtonClick()
+    IEnumerator IngameIntro()
     {
+        introMusicInfoAnimator.Play("IngameMusicInfoAnimation");
+        while (introMusicInfoAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1) { yield return null; }
         GameController.isPlaying = true;
+        yield return null;
     }
 
     public void OnJudgeTriggered(Judge judge, double timingDiff)
