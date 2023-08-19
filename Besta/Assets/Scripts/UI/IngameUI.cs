@@ -16,6 +16,7 @@ public class IngameUI : MonoBehaviour
     TextMeshProUGUI artistNameText;
     TextMeshProUGUI etcText;
     Image jacketImage;
+    Image fadePanelImage;
     Coroutine judgeTextCoroutine;
     Coroutine timingDiffTextCoroutine;
 
@@ -41,9 +42,12 @@ public class IngameUI : MonoBehaviour
 
         comboTextAnimator = GameObject.Find("ComboText").GetComponent<Animator>();
         introMusicInfoAnimator = GameObject.Find("IngameMusicInfo").GetComponent<Animator>();
+        fadePanelImage = GameObject.Find("FadePanel").GetComponent<Image>();
 
+        GameController.JudgeAction = null;
         GameController.JudgeAction -= OnJudgeTriggered;
         GameController.JudgeAction += OnJudgeTriggered;
+        GameController.ScoreUpdateAction = null;
         GameController.ScoreUpdateAction -= OnScoreUpdate;
         GameController.ScoreUpdateAction += OnScoreUpdate;
         StartCoroutine(IngameIntro());
@@ -144,5 +148,18 @@ public class IngameUI : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
         timingDiffText.color = new Color(0, 0, 0, 0);
+    }
+
+    public IEnumerator FadeOutGameScene()
+    {
+        yield return new WaitForSeconds(1);
+        float currentTime = 0;
+        while (currentTime < 1)
+        {
+            currentTime += Time.deltaTime;
+            fadePanelImage.color = new Color(0, 0, 0, (Mathf.Lerp(0, 1, currentTime / 1)));
+            yield return null;
+        }
+        Managers.Scene.LoadScene(Scene.GameResult);
     }
 }

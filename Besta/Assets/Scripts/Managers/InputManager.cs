@@ -36,6 +36,9 @@ public class InputManager
 
             if (Input.GetKeyDown(KeyCode.Escape))
                 KeyDownAction.Invoke(KeyCode.Escape);
+
+            if (Input.GetKeyDown(KeyCode.Return))       // ฟฃลอ
+                KeyDownAction.Invoke(KeyCode.Return);
         }
 
         if (KeyPressAction != null)

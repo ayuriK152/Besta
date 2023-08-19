@@ -21,6 +21,10 @@ public class UIManager
                 currentSceneUI = go.GetComponent<MusicSelectUI>();
                 Debug.Log("MusicSelect UI Loaded");
                 break;
+            case Define.Scene.GameResult:
+                currentSceneUI = go.GetComponent<GameResultUI>();
+                Debug.Log("CurrentScene UI Loaded");
+                break;
         }
     }
 }

@@ -54,7 +54,8 @@ public class Define
         Ingame,
         MusicSelect,
         StartMenu,
-        PatternEditor
+        PatternEditor,
+        GameResult
     }
 
     public enum Judge

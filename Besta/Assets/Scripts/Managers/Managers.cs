@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Managers : MonoBehaviour
 {
-    static Managers _managerInstance;
-    static Managers ManagerInstance { get { Init(); return _managerInstance; } }
+    static Managers _managerInstance = null;
+    static Managers ManagerInstance { get { return _managerInstance; } }
 
     private static InputManager _input = new InputManager();
     private static SoundManager _sound = new SoundManager();
@@ -23,13 +21,17 @@ public class Managers : MonoBehaviour
 
     void Awake()
     {
+        if (_managerInstance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
         Init();
     }
 
     void Update()
     {
         Input.OnUpdate();
-        Game.OnUpdate();
     }
 
     static void Init()
@@ -50,5 +52,6 @@ public class Managers : MonoBehaviour
         Sound.Init();
         Scene.Init();
         Data.Init();
+        Game.Init();
     }
 }

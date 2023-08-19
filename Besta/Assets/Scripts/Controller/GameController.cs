@@ -55,6 +55,9 @@ public class GameController : MonoBehaviour
         Managers.Input.KeyUpAction = null;
         Managers.Input.KeyUpAction -= PlayerKeyUp;
         Managers.Input.KeyUpAction += PlayerKeyUp;
+        Managers.Game.CheckGameEndAction = null;
+        Managers.Game.CheckGameEndAction -= EndUpGame;
+        Managers.Game.CheckGameEndAction += EndUpGame;
 
         LoadPattern();
     }
@@ -66,6 +69,12 @@ public class GameController : MonoBehaviour
             ScrollPattern();
             CheckMissingNote();
         }
+    }
+
+    void EndUpGame(bool isFullCombo)
+    {
+        Debug.Log($"Game ends! Full combo {isFullCombo}");
+        StartCoroutine((Managers.UI.currentSceneUI as IngameUI).FadeOutGameScene());
     }
 
     void CheckMissingNote()
@@ -134,6 +143,8 @@ public class GameController : MonoBehaviour
     {
         holdingCheck[lane] = true;
         lanePressEffects[lane].enabled = true;
+        if (laneNoteDatas[lane].Count == 0)
+            yield break;
         timing = (laneNoteDatas[lane].Peek().data.startTiming + timing) / Managers.Sound.managerAudioSource.clip.frequency;
         if (timing <= 0.2)
         {
@@ -208,6 +219,8 @@ public class GameController : MonoBehaviour
     {
         holdingCheck[lane] = false;
         lanePressEffects[lane].enabled = false;
+        if (laneNoteDatas[lane].Count == 0)
+            yield break;
         if (holdingSampleAmout[lane] > 0)
         {
             double tempDiff = (double)(laneNoteDatas[lane].Peek().data.endTiming - timing) / Managers.Sound.managerAudioSource.clip.frequency;
@@ -232,62 +245,67 @@ public class GameController : MonoBehaviour
 
     IEnumerator JudgingInput(double diff, int lane)
     {
+        if (laneNoteDatas[lane].Count == 0)
+            Managers.Game.DataQueueEmptyAction.Invoke();
         perfectAcc += 3;
         if (diff <= 0.04167 && diff >= -0.04167)
         {
-            Debug.Log("Besta");
             gainedAcc += 3;
             Managers.Game.currentCombo += 1;
             JudgeAction.Invoke(Judge.Besta, diff);
+            Managers.Game.judgeCount[(int)Judge.Besta]++;
         }
         else if (diff <= 0.1 && diff >= -0.1)
         {
-            Debug.Log("Good");
             gainedAcc += 2;
             Managers.Game.currentCombo += 1;
             JudgeAction.Invoke(Judge.Good, diff);
+            Managers.Game.judgeCount[(int)Judge.Good]++;
         }
         else if (diff <= 0.16667 && diff >= -0.16667)
         {
-            Debug.Log("Bad");
             gainedAcc += 1;
             Managers.Game.currentCombo += 1;
             JudgeAction.Invoke(Judge.Bad, diff);
+            Managers.Game.judgeCount[(int)Judge.Bad]++;
         }
         else
         {
-            Debug.LogWarning("Miss");
             Managers.Game.currentCombo = 0;
+            Managers.Game.isFullCombo = false;
             JudgeAction.Invoke(Judge.Miss, diff);
+            Managers.Game.judgeCount[(int)Judge.Miss]++;
         }
         StartCoroutine(CalcScore());
         yield return null;
     }
     IEnumerator JudgingLongNoteInput(double diff, int lane)
     {
+        if (laneNoteDatas[lane].Count == 0)
+            Managers.Game.DataQueueEmptyAction.Invoke();
         perfectAcc += 3;
         if (diff <= 0.1 && diff >= -0.1)
         {
-            Debug.Log("Besta");
             gainedAcc += 3;
             Managers.Game.currentCombo += 1;
             JudgeAction.Invoke(Judge.Besta, diff);
+            Managers.Game.judgeCount[(int)Judge.Besta]++;
             longnoteStartJudge[lane] = Judge.Besta;
         }
         else if (diff <= 0.16667 && diff >= -0.16667)
         {
-            Debug.Log("Bad");
             gainedAcc += 1;
             Managers.Game.currentCombo += 1;
             JudgeAction.Invoke(Judge.Bad, diff);
+            Managers.Game.judgeCount[(int)Judge.Bad]++;
             longnoteStartJudge[lane] = Judge.Bad;
         }
         else
         {
-            Debug.LogWarning("Miss");
             gainedAcc += 0;
             Managers.Game.currentCombo = 0;
             JudgeAction.Invoke(Judge.Miss, diff);
+            Managers.Game.judgeCount[(int)Judge.Miss]++;
             longnoteStartJudge[lane] = Judge.Miss;
         }
         StartCoroutine(CalcScore());
