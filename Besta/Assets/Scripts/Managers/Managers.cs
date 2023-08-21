@@ -19,6 +19,8 @@ public class Managers : MonoBehaviour
     public static SceneManagerEx Scene { get { return _scene; } }
     public static UIManager UI { get { return _ui; } }
 
+    public static string currentVirsion = "alpha 1.0.0";
+
     void Awake()
     {
         if (_managerInstance != null)

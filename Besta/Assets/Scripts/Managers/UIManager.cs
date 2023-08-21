@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class UIManager
@@ -26,5 +27,9 @@ public class UIManager
                 Debug.Log("CurrentScene UI Loaded");
                 break;
         }
+
+        TextMeshProUGUI virsionText = GameObject.Find("Version").GetComponent<TextMeshProUGUI>();
+        if (virsionText != null)
+            virsionText.text = Managers.currentVirsion;
     }
 }
