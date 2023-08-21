@@ -23,7 +23,7 @@ public class MusicSelectUI : MonoBehaviour
         musicSoundValueSign = GameObject.Find("MusicSoundSetting").transform.Find("ValueSign").GetComponent<TextMeshProUGUI>();
         musicSoundSlider = GameObject.Find("MusicSoundSetting").transform.Find("Slider").GetComponent<Slider>();
         musicSoundSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("MusicSoundValue"));
-        musicSoundValueSign.text = Math.Truncate(musicSoundSlider.value * 100).ToString();
+        musicSoundValueSign.text = Math.Round(musicSoundSlider.value * 100).ToString();
         optionUIObj.active = false;
     }
 
