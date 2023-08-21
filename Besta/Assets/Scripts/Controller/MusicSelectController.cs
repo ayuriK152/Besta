@@ -26,14 +26,16 @@ public class MusicSelectController : MonoBehaviour
             tempPatternList.Add(Managers.Data.LoadJsonData<MusicPattern>(d as TextAsset));
         foreach (MusicPattern p in tempPatternList)
         {
-            musicList.Add(Instantiate(musicPanelPrefab, musicListInstantiateObject.transform).GetComponent<MusicPanel>());
+            GameObject panelObject = Instantiate(musicPanelPrefab, musicListInstantiateObject.transform);
+            panelObject.name = $"{musicList.Count}-{p.name}";
+            musicList.Add(panelObject.GetComponent<MusicPanel>());
             musicList[musicList.Count - 1].name = p.name;
             musicList[musicList.Count - 1].artist = p.artist;
             musicList[musicList.Count - 1].bpm = p.bpm;
             musicList[musicList.Count - 1].UpdateInfo();
         }
         Managers.Sound.managerAudioSource.clip = null;
-        musicList[0].OnClickSelectButton();
+        musicList[PlayerPrefs.GetInt("LastSelectMusic")].OnClickSelectButton();
 
         Managers.Input.KeyDownAction = null;
         Managers.Input.KeyDownAction -= PlayerKeyDown;

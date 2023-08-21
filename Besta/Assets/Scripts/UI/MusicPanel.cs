@@ -29,6 +29,7 @@ public class MusicPanel : MonoBehaviour
         AudioClip tempMusic = Resources.Load<AudioClip>($"Patterns/{name}/music");
         if (Managers.Sound.managerAudioSource.clip == tempMusic)
         {
+            PlayerPrefs.SetInt("LastSelectMusic", int.Parse(gameObject.name.Split('-')[0]));
             if (MusicSelectController.fadeinCoroutine != null)
                 StopCoroutine(MusicSelectController.fadeinCoroutine);
             Managers.Sound.managerAudioSource.Stop();

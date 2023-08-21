@@ -149,5 +149,8 @@ public class DataManager
 
         if (!PlayerPrefs.HasKey("EffectSoundValue"))
             PlayerPrefs.SetFloat("EffectSoundValue", 0.5f);
+
+        if (!PlayerPrefs.HasKey("LastSelectMusic"))
+            PlayerPrefs.SetInt("LastSelectMusic", 0);
     }
 }
