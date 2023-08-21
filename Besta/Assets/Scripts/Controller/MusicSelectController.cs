@@ -32,6 +32,7 @@ public class MusicSelectController : MonoBehaviour
             musicList[musicList.Count - 1].bpm = p.bpm;
             musicList[musicList.Count - 1].UpdateInfo();
         }
+        Managers.Sound.managerAudioSource.clip = null;
         musicList[0].OnClickSelectButton();
 
         Managers.Input.KeyDownAction = null;
