@@ -28,8 +28,11 @@ public class UIManager
                 break;
         }
 
-        TextMeshProUGUI virsionText = GameObject.Find("Version").GetComponent<TextMeshProUGUI>();
-        if (virsionText != null)
-            virsionText.text = Managers.currentVirsion;
+        if (Managers.Scene.currentScene != Define.Scene.PatternEditor)
+        {
+            TextMeshProUGUI virsionText = GameObject.Find("Version").GetComponent<TextMeshProUGUI>();
+            if (virsionText != null)
+                virsionText.text = Managers.currentVirsion;
+        }
     }
 }

@@ -24,7 +24,7 @@ public class GameResultUI : MonoBehaviour
         missText = GameObject.Find("MissCount").transform.Find("Value").GetComponent<TextMeshProUGUI>();
 
         scoreText.text = Managers.Game.gainedScore.ToString();
-        comboText.text = Managers.Game.currentCombo.ToString();
+        comboText.text = Managers.Game.maxCombo.ToString();
         accuracyText.text = $"{(Math.Truncate(Managers.Game.acurracy * 10000) * 0.01)}%";
         bestaText.text = Managers.Game.judgeCount[(int)Judge.Besta].ToString();
         goodText.text = Managers.Game.judgeCount[(int)Judge.Good].ToString();

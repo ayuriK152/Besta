@@ -10,8 +10,16 @@ public class MusicSelectUI : MonoBehaviour
     public TextMeshProUGUI currentArtist;
     public TextMeshProUGUI currentBPM;
     public GameObject optionUIObj;
-    public TextMeshProUGUI musicSoundValueSign;
+    public TextMeshProUGUI musicSoundValueText;
     public Slider musicSoundSlider;
+    public TextMeshProUGUI userOffsetValueText;
+    public Slider userOffsetSlider;
+    public TextMeshProUGUI judgeLineHeightValueText;
+    public Slider judgeLineHeightSlider;
+    public TextMeshProUGUI notePositionValueText;
+    public Slider notePositionSlider;
+    public TextMeshProUGUI slideSpeedValueText;
+    public Slider slideSpeedSlider;
 
     private void Awake()
     {
@@ -19,18 +27,77 @@ public class MusicSelectUI : MonoBehaviour
         currentName = transform.Find("MusicDetailPreview").Find("CurrentName").GetComponent<TextMeshProUGUI>();
         currentArtist = transform.Find("MusicDetailPreview").Find("CurrentArtist").GetComponent<TextMeshProUGUI>();
         currentBPM = transform.Find("MusicDetailPreview").Find("CurrentBPM").GetComponent<TextMeshProUGUI>();
+
         optionUIObj = transform.Find("OptionPanel").gameObject;
-        musicSoundValueSign = GameObject.Find("MusicSoundSetting").transform.Find("ValueSign").GetComponent<TextMeshProUGUI>();
+
+        musicSoundValueText = GameObject.Find("MusicSoundSetting").transform.Find("Value").GetComponent<TextMeshProUGUI>();
         musicSoundSlider = GameObject.Find("MusicSoundSetting").transform.Find("Slider").GetComponent<Slider>();
-        musicSoundSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("MusicSoundValue"));
-        musicSoundValueSign.text = Math.Round(musicSoundSlider.value * 100).ToString();
+        musicSoundSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("MusicSoundValue"));
+        musicSoundValueText.text = $"{PlayerPrefs.GetInt("MusicSoundValue")}";
+
+        userOffsetValueText = GameObject.Find("UserOffsetSetting").transform.Find("Value").GetComponent<TextMeshProUGUI>();
+        userOffsetSlider = GameObject.Find("UserOffsetSetting").transform.Find("Slider").GetComponent<Slider>();
+        userOffsetSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("UserOffset"));
+        userOffsetValueText.text = $"{PlayerPrefs.GetInt("UserOffset")}ms";
+
+        judgeLineHeightValueText = GameObject.Find("JudgeLineHeightSetting").transform.Find("Value").GetComponent<TextMeshProUGUI>();
+        judgeLineHeightSlider = GameObject.Find("JudgeLineHeightSetting").transform.Find("Slider").GetComponent<Slider>();
+        judgeLineHeightSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("JudgeLineHeight"));
+        if (judgeLineHeightSlider.value > 0)
+            judgeLineHeightValueText.text = $"+{PlayerPrefs.GetInt("JudgeLineHeight")}";
+        else
+            judgeLineHeightValueText.text = $"{PlayerPrefs.GetInt("JudgeLineHeight")}";
+
+        notePositionValueText = GameObject.Find("NotePositionSetting").transform.Find("Value").GetComponent<TextMeshProUGUI>();
+        notePositionSlider = GameObject.Find("NotePositionSetting").transform.Find("Slider").GetComponent<Slider>();
+        notePositionSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("NotePosition"));
+        if (notePositionSlider.value > 0)
+            notePositionValueText.text = $"+{PlayerPrefs.GetInt("NotePosition")}";
+        else
+            notePositionValueText.text = $"{PlayerPrefs.GetInt("NotePosition")}";
+
+        slideSpeedValueText = GameObject.Find("SlideSpeedSetting").transform.Find("Value").GetComponent<TextMeshProUGUI>();
+        slideSpeedSlider = GameObject.Find("SlideSpeedSetting").transform.Find("Slider").GetComponent<Slider>();
+        slideSpeedSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("SlideSpeed"));
+        slideSpeedValueText.text = $"{slideSpeedSlider.value / 10}.{slideSpeedSlider.value % 10}";
+
         optionUIObj.active = false;
     }
 
     public void OnMusicSoundValueChange()
     {
-        PlayerPrefs.SetFloat("MusicSoundValue", ((float)Math.Ceiling(musicSoundSlider.value * 100) * 0.01f));
-        musicSoundValueSign.text = Math.Round(PlayerPrefs.GetFloat("MusicSoundValue") * 100).ToString();
-        Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetFloat("MusicSoundValue");
+        PlayerPrefs.SetInt("MusicSoundValue", (int)musicSoundSlider.value);
+        musicSoundValueText.text = PlayerPrefs.GetInt("MusicSoundValue").ToString();
+        Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetInt("MusicSoundValue") / 100.0f;
+    }
+
+    public void OnUserOffsetValueChange()
+    {
+        PlayerPrefs.SetInt("UserOffset", (int)userOffsetSlider.value);
+        userOffsetValueText.text = $"{PlayerPrefs.GetInt("UserOffset")}ms";
+    }
+
+    public void OnJudgeLineHeightValueChange()
+    {
+        PlayerPrefs.SetInt("JudgeLineHeight", (int)judgeLineHeightSlider.value);
+        if (judgeLineHeightSlider.value > 0)
+            judgeLineHeightValueText.text = $"+{PlayerPrefs.GetInt("JudgeLineHeight")}";
+        else
+            judgeLineHeightValueText.text = $"{PlayerPrefs.GetInt("JudgeLineHeight")}";
+    }
+
+    public void OnNotePositionValueChange()
+    {
+        PlayerPrefs.SetInt("NotePosition", (int)notePositionSlider.value);
+        if (notePositionSlider.value > 0)
+            notePositionValueText.text = $"+{PlayerPrefs.GetInt("NotePosition")}";
+        else
+            notePositionValueText.text = $"{PlayerPrefs.GetInt("NotePosition")}";
+    }
+
+    public void OnSlideSpeedValueChange()
+    {
+        PlayerPrefs.SetInt("SlideSpeed", (int)slideSpeedSlider.value);
+        slideSpeedValueText.text = $"{(int)slideSpeedSlider.value / 10}.{slideSpeedSlider.value % 10}";
     }
 }

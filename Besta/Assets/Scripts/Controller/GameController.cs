@@ -9,6 +9,7 @@ public class GameController : MonoBehaviour
 {
     GameObject gameNotePref;
     GameObject patternObject;
+    GameObject judgeLineObject;
     Transform[] laneTransforms = new Transform[4];
     SpriteRenderer[] lanePressEffects = new SpriteRenderer[4];
 
@@ -17,8 +18,10 @@ public class GameController : MonoBehaviour
     Judge[] longnoteStartJudge = new Judge[4];
     bool[] holdingCheck = new bool[4];
     int gainedAcc = 0, perfectAcc = 0;
-    int passedNote;
-    float scrollSpeed = 4;
+    int passedNote = 0;
+    int userOffset;
+    float patternObjectPosOffset;
+    float scrollSpeed;
 
     public static bool isPlaying;
 
@@ -31,6 +34,8 @@ public class GameController : MonoBehaviour
     {
         gameNotePref = Resources.Load("Prefabs/GameNote") as GameObject;
         patternObject = GameObject.Find("Pattern");
+        judgeLineObject = GameObject.Find("JudgeLine");
+        judgeLineObject.transform.localPosition = new Vector2(0, -3.5f + PlayerPrefs.GetInt("JudgeLineHeight") / 20.0f);
         laneTransforms[0] = GameObject.Find("First").transform;
         laneTransforms[1] = GameObject.Find("Second").transform;
         laneTransforms[2] = GameObject.Find("Third").transform;
@@ -45,6 +50,11 @@ public class GameController : MonoBehaviour
             laneNoteDatas[i] = new Queue<GameNote>();
         }
         Array.Fill(holdingSampleAmout, 0);
+
+        userOffset = PlayerPrefs.GetInt("UserOffset");
+        scrollSpeed = PlayerPrefs.GetInt("SlideSpeed") / 10.0f;
+        patternObjectPosOffset = 4.8f * (PlayerPrefs.GetInt("NotePosition") / 20.0f);
+        patternObject.transform.localPosition = new Vector2(0, patternObjectPosOffset * scrollSpeed);
 
         Managers.Input.KeyDownAction = null;
         Managers.Input.KeyDownAction -= PlayerKeyDown;
@@ -93,26 +103,31 @@ public class GameController : MonoBehaviour
     {
         lane -= 1;
         double diffUpdatesAlways = -(Managers.Sound.managerAudioSource.timeSamples + Managers.Game.currentLoadedPattern.songOffset);
-        if (!laneNoteDatas[lane].Peek().data.isLongNote && (laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667)
+        double calculatedStartTimingDiff = (laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency;
+        if (!laneNoteDatas[lane].Peek().data.isLongNote && calculatedStartTimingDiff < -(0.16667 + userOffset / 1000.0))
         {
             Destroy(laneNotes[lane].Dequeue());
-            StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency, lane));
+            laneNoteDatas[lane].Dequeue();
+            StartCoroutine(JudgingInput(calculatedStartTimingDiff + userOffset / 1000.0, lane));
         }
         else if (laneNoteDatas[lane].Peek().data.isLongNote)
         {
-            if ((laneNoteDatas[lane].Peek().data.endTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667)
+            double calculatedEndTimingDiff = (laneNoteDatas[lane].Peek().data.endTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency;
+            if (calculatedEndTimingDiff < -(0.16667 + userOffset / 1000.0))
             {
                 Destroy(laneNotes[lane].Dequeue());
+                laneNoteDatas[lane].Dequeue();
                 holdingSampleAmout[lane] = 0;
-                StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.endTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency, lane));
+                StartCoroutine(JudgingInput(calculatedEndTimingDiff + userOffset / 1000.0, lane));
             }
-            else if ((laneNoteDatas[lane].Peek().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency < -0.16667 && holdingSampleAmout[lane] == 0)
+            else if (calculatedStartTimingDiff < -(0.16667 + userOffset / 1000.0) && holdingSampleAmout[lane] == 0)
             {
                 passedNote += 1;
                 perfectAcc += 3;
                 Destroy(laneNotes[lane].Dequeue());
+                laneNoteDatas[lane].Dequeue();
                 holdingSampleAmout[lane] = 0;
-                StartCoroutine(JudgingInput((laneNoteDatas[lane].Dequeue().data.startTiming + diffUpdatesAlways) / Managers.Sound.managerAudioSource.clip.frequency, lane));
+                StartCoroutine(JudgingInput(calculatedStartTimingDiff + userOffset / 1000.0, lane));
             }
         }
 
@@ -152,13 +167,13 @@ public class GameController : MonoBehaviour
             {
                 laneNoteDatas[lane].Dequeue();
                 Destroy(laneNotes[lane].Dequeue());
-                StartCoroutine(JudgingInput(timing, lane));
+                StartCoroutine(JudgingInput(timing + userOffset / 1000.0, lane));
             }
             else
             {
                 holdingSampleAmout[lane] = laneNoteDatas[lane].Peek().data.startTiming;
                 holdingSampleAmout[lane] += _barSampleAmount * 0.125f;
-                StartCoroutine(JudgingLongNoteInput(timing, lane));
+                StartCoroutine(JudgingLongNoteInput(timing + userOffset / 1000.0, lane));
             }
         }
         yield return null;
@@ -314,12 +329,12 @@ public class GameController : MonoBehaviour
 
     void ScrollPattern()
     {
-        patternObject.transform.Translate(new Vector3(0, -Managers.Sound.managerAudioSource.clip.frequency / _barSampleAmount * 4.8f, 0) * scrollSpeed * Time.deltaTime);
+        patternObject.transform.Translate(new Vector3(0, -(Managers.Sound.managerAudioSource.clip.frequency / _barSampleAmount * 4.8f), 0) * scrollSpeed * Time.deltaTime);
         if (isPlaying && !Managers.Sound.managerAudioSource.isPlaying)
         {
-            if (-patternObject.transform.localPosition.y / (4.8f * 5) >= 2 && (_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * scrollSpeed * 2)) / (4.8f * scrollSpeed)) >= Managers.Game.currentLoadedPattern.songOffset))
+            if (-patternObject.transform.localPosition.y + patternObjectPosOffset / (4.8f * scrollSpeed) >= 2 && (_barSampleAmount * ((-patternObject.transform.localPosition.y + patternObjectPosOffset - (4.8f * scrollSpeed * 2)) / (4.8f * scrollSpeed)) >= Managers.Game.currentLoadedPattern.songOffset))
             {
-                Managers.Sound.managerAudioSource.timeSamples = (int)(_barSampleAmount * ((-patternObject.transform.localPosition.y - (4.8f * scrollSpeed * 2)) / (4.8f * scrollSpeed)) - Managers.Game.currentLoadedPattern.songOffset);
+                Managers.Sound.managerAudioSource.timeSamples = (int)(_barSampleAmount * ((-patternObject.transform.localPosition.y + patternObjectPosOffset - (4.8f * scrollSpeed * 2)) / (4.8f * scrollSpeed)) - Managers.Game.currentLoadedPattern.songOffset);
                 Managers.Sound.managerAudioSource.Play();
             }
         }

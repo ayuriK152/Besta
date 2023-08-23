@@ -34,7 +34,7 @@ public class MusicPanel : MonoBehaviour
                 StopCoroutine(MusicSelectController.fadeinCoroutine);
             Managers.Sound.managerAudioSource.Stop();
             Managers.Sound.managerAudioSource.loop = false;
-            Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetFloat("MusicSoundValue");
+            Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetInt("MusicSoundValue") / 100.0f;
             Managers.Game.currentLoadedPattern = Managers.Data.LoadJsonData<MusicPattern>(Resources.Load<TextAsset>($"Patterns/{name}/data"));
             Managers.Game.currentLoadedPattern.ReloadMusic();
             Managers.Sound.managerAudioSource.clip = Managers.Game.currentLoadedPattern.musicSource;

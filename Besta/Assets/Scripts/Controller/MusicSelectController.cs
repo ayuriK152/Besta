@@ -48,7 +48,7 @@ public class MusicSelectController : MonoBehaviour
         while (currentTime < 1)
         {
             currentTime += Time.deltaTime;
-            Managers.Sound.managerAudioSource.volume = Mathf.Lerp(0, PlayerPrefs.GetFloat("MusicSoundValue"), currentTime / 1);
+            Managers.Sound.managerAudioSource.volume = Mathf.Lerp(0, PlayerPrefs.GetInt("MusicSoundValue") / 100.0f, currentTime / 1);
             yield return null;
         }
         yield break;

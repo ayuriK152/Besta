@@ -144,13 +144,22 @@ public class DataManager
     public void PlayerOptionInit()
     {
         if (!PlayerPrefs.HasKey("MusicSoundValue"))
-            PlayerPrefs.SetFloat("MusicSoundValue", 0.5f);
-        Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetFloat("MusicSoundValue");
+            PlayerPrefs.SetInt("MusicSoundValue", 50);
+        Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetInt("MusicSoundValue") / 100.0f;
 
         if (!PlayerPrefs.HasKey("EffectSoundValue"))
             PlayerPrefs.SetFloat("EffectSoundValue", 0.5f);
 
         if (!PlayerPrefs.HasKey("LastSelectMusic"))
             PlayerPrefs.SetInt("LastSelectMusic", 0);
+
+        if (!PlayerPrefs.HasKey("UserOffset"))
+            PlayerPrefs.SetInt("UserOffset", 0);
+
+        if (!PlayerPrefs.HasKey("JudgeLineHeight"))
+            PlayerPrefs.SetInt("JudgeLineHeight", 0);
+
+        if (!PlayerPrefs.HasKey("SlideSpeed"))
+            PlayerPrefs.SetInt("SlideSpeed", 10);
     }
 }
