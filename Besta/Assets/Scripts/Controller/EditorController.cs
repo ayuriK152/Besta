@@ -26,7 +26,9 @@ public class EditorController : MonoBehaviour
     public static int patternOffset;
     public static int totalCombo = 0;
     public static string patternTitle;
-    
+    public static string patternArtist;
+    public static string patternDesigner;
+
     MusicPattern _musicPattern;
     double _noteTimingValue;
     double _timingValuePerBar;
@@ -439,6 +441,18 @@ public class EditorController : MonoBehaviour
                 uiScript.OnTitleUpdateByController();
             }
         }
+
+        // 노래 아티스트 변경시
+        if (_musicPattern.artist != patternArtist)
+        {
+            _musicPattern.artist = patternArtist;
+        }
+
+        // 패턴 디자이너 변경시
+        if (_musicPattern.designer != patternDesigner)
+        {
+            _musicPattern.designer = patternDesigner;
+        }
     }
 
     void OnBarAmountChanged()
@@ -515,6 +529,8 @@ public class EditorController : MonoBehaviour
         _musicPattern.ReloadMusic();
         _musicPattern.totalCombo = 0;
         patternTitle = _musicPattern.name;
+        patternArtist = _musicPattern.artist;
+        patternDesigner = _musicPattern.designer;
 
         // 기존 작업물 내용 삭제 과정
         for (int i = _barAmount - 1; i >= 0; i--)
@@ -576,6 +592,8 @@ public class EditorController : MonoBehaviour
         uiScript.OnOffsetChangeByController();
         uiScript.OnBaseBPMChangeByController();
         uiScript.OnTitleUpdateByController();
+        uiScript.OnArtistUpdateByController();
+        uiScript.OnDesignerUpdateByController();
         uiScript.OriginTimeUIUpdate();
         OnPlayValueChanged(false);
     }

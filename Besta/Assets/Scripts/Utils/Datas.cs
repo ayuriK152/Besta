@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Define;
 
@@ -39,6 +40,7 @@ public class Datas
         public AudioClip musicSource;
         public string name;
         public string artist;
+        public string designer;
         public int bpm;
         public int songOffset;
         public int songLength;
@@ -50,6 +52,8 @@ public class Datas
             bpm = 120;
             songOffset = 0;
             name = _name;
+            artist = "";
+            designer = "";
             ReloadMusic();
             songLength = songOffset + musicSource.samples;
             noteDatas = new List<Note>();

@@ -28,11 +28,16 @@ public class UIManager
                 break;
         }
 
+        TextMeshProUGUI versionText = GameObject.Find("Version").GetComponent<TextMeshProUGUI>();
         if (Managers.Scene.currentScene != Define.Scene.PatternEditor)
         {
-            TextMeshProUGUI virsionText = GameObject.Find("Version").GetComponent<TextMeshProUGUI>();
-            if (virsionText != null)
-                virsionText.text = Managers.currentVirsion;
+            if (versionText != null)
+                versionText.text = Managers.currentVersion;
+        }
+        else
+        {
+            if (versionText != null)
+                versionText.text = Managers.currentEditorVersion;
         }
     }
 }

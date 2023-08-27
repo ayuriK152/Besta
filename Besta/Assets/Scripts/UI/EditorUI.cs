@@ -9,23 +9,27 @@ using static Define;
 public class EditorUI : MonoBehaviour
 {
     TMP_Dropdown beatChangeDropdown;
-    TMP_Dropdown noteModeChangeDropdown;
+    Toggle noteModeToggle;
     public Slider editorPlayValueSlider;
     TMP_InputField baseBPMInputField;
     TMP_InputField offsetInputField;
     TMP_InputField patternTitleInputField;
+    TMP_InputField patternArtistInputField;
+    TMP_InputField patternDesignerInputField;
     TextMeshProUGUI originTimeText;
     TextMeshProUGUI progressTimeText;
     TextMeshProUGUI progressPercetageText;
     TextMeshProUGUI maxComboText;
+
+    GameObject editorOptionObj;
 
     void Start()
     {
         #region UI바인딩 및 초기화
         beatChangeDropdown = GameObject.Find("BeatSelector").transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
         beatChangeDropdown.value = 5;
-        noteModeChangeDropdown = GameObject.Find("NoteModeSelector").transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
-        noteModeChangeDropdown.value = 0;
+        noteModeToggle = GameObject.Find("NoteModeSelector").transform.Find("NormalNoteToggle").GetComponent<Toggle>();
+        noteModeToggle.isOn = true;
         editorPlayValueSlider = GameObject.Find("PlayValueSlider").transform.GetComponent<Slider>();
         editorPlayValueSlider.value = 0;
         baseBPMInputField = GameObject.Find("BPMSetting").transform.Find("InputField").GetComponent<TMP_InputField>();
@@ -39,7 +43,12 @@ public class EditorUI : MonoBehaviour
         maxComboText = GameObject.Find("MaxCombo").transform.Find("Value").GetComponent<TextMeshProUGUI>();
         maxComboText.text = "0";
         patternTitleInputField = GameObject.Find("PatternNameSetting").transform.Find("InputField").GetComponent<TMP_InputField>();
+        patternArtistInputField = GameObject.Find("PatternArtistSetting").transform.Find("InputField").GetComponent<TMP_InputField>();
+        patternDesignerInputField = GameObject.Find("PatternDesignerSetting").transform.Find("InputField").GetComponent<TMP_InputField>();
         #endregion
+
+        editorOptionObj = GameObject.Find("EditorOption");
+        editorOptionObj.SetActive(false);
 
         EditorController.PatternMaxComboUpdateAction -= OnMaxComboChange;
         EditorController.PatternMaxComboUpdateAction += OnMaxComboChange;
@@ -69,7 +78,14 @@ public class EditorUI : MonoBehaviour
 
     public void OnNoteModeChange()
     {
-        EditorController.editorNoteMode = (EditorNoteMode)noteModeChangeDropdown.value;
+        if (noteModeToggle.isOn)
+        {
+            EditorController.editorNoteMode = EditorNoteMode.NormalNote;
+        }
+        else
+        {
+            EditorController.editorNoteMode = EditorNoteMode.LongNote;
+        }
     }
 
     public void OnPlayValueChange()
@@ -134,9 +150,31 @@ public class EditorUI : MonoBehaviour
         EditorController.PatternSettingChangeAction.Invoke();
     }
 
+    public void OnArtistUpdate()
+    {
+        EditorController.patternArtist = patternArtistInputField.text;
+        EditorController.PatternSettingChangeAction.Invoke();
+    }
+
+    public void OnDesignerUpdate()
+    {
+        EditorController.patternDesigner = patternDesignerInputField.text;
+        EditorController.PatternSettingChangeAction.Invoke();
+    }
+
     public void OnTitleUpdateByController()
     {
-        patternTitleInputField.text = EditorController.patternTitle.ToString();
+        patternTitleInputField.text = EditorController.patternTitle;
+    }
+
+    public void OnArtistUpdateByController()
+    {
+        patternArtistInputField.text = EditorController.patternArtist;
+    }
+
+    public void OnDesignerUpdateByController()
+    {
+        patternDesignerInputField.text = EditorController.patternDesigner;
     }
 
     public void OriginTimeUIUpdate()
@@ -181,5 +219,10 @@ public class EditorUI : MonoBehaviour
             progressTimeText.text += $"0{ms}";
         else
             progressTimeText.text += $"00{ms}";
+    }
+
+    public void OnClickEditorSettingButton()
+    {
+        editorOptionObj.SetActive(true);
     }
 }
