@@ -372,19 +372,18 @@ public class EditorController : MonoBehaviour
         // BPM º¯°æ½Ã
         if (_musicPattern.bpm != baseBPM)
         {
+            int legacyBpm = _musicPattern.bpm;
             _musicPattern.bpm = baseBPM;
-            double legacyTimingValue = _noteTimingValue;
+            double updateRatio = (double)legacyBpm / _musicPattern.bpm;
             _timingValuePerBar = (_musicPattern.musicSource.frequency / (_musicPattern.bpm / (double)60)) * 4;
             _noteTimingValue = _timingValuePerBar / beatDivideNum;
             _editorBarMaxPosition = Managers.Sound.managerAudioSource.clip.samples * 4.8f / ((float)_timingValuePerBar);
             if (_barAmount != (int)(_musicPattern.songLength / _timingValuePerBar) + 1)
                 OnBarAmountChanged();
 
-
             for (int i = 0; i < _instantiatedEditorNotes.Count; i++)
             {
-                double tempIndex = _instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData.startTiming / legacyTimingValue;
-                double tempStartTiming = _noteTimingValue * (tempIndex - (int)tempIndex >= 0.5f ? (int)tempIndex + 1 : (int)tempIndex);
+                double tempStartTiming = _instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData.startTiming * updateRatio;
                 _instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData.startTiming = tempStartTiming - (int)tempStartTiming >= 0.5f ? (int)tempStartTiming + 1 : (int)tempStartTiming;
                 if (_instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData.startTiming >= _musicPattern.songLength)
                 {
@@ -394,8 +393,7 @@ public class EditorController : MonoBehaviour
                 }
                 if (_instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData.isLongNote)
                 {
-                    tempIndex = _instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData.endTiming / legacyTimingValue;
-                    double tempEndTiming = _noteTimingValue * (tempIndex - (int)tempIndex >= 0.5f ? (int)tempIndex + 1 : (int)tempIndex);
+                    double tempEndTiming = _instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData.endTiming * updateRatio;
                     _instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData.endTiming = tempEndTiming - (int)tempEndTiming >= 0.5f ? (int)tempEndTiming + 1 : (int)tempEndTiming;
                     if (_instantiatedEditorNotes[i].GetComponent<EditorNote>().noteData.endTiming >= _musicPattern.songLength)
                     {
