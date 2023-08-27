@@ -59,12 +59,27 @@ public class MusicSelectController : MonoBehaviour
         switch (key)
         {
             case KeyCode.F3:
-                if (!ui.optionUIObj.activeSelf)
-                    ui.optionUIObj.active = true;
+                if (!ui.exitPanelObj.activeSelf)
+                {
+                    if (!ui.optionUIObj.activeSelf)
+                        ui.optionUIObj.SetActive(true);
+                }
                 break;
             case KeyCode.Escape:
                 if (ui.optionUIObj.activeSelf)
-                    ui.optionUIObj.active = false;
+                    ui.optionUIObj.SetActive(false);
+                else if (!ui.exitPanelObj.activeSelf)
+                    ui.exitPanelObj.SetActive(true);
+                else if (ui.exitPanelObj.activeSelf)
+                    ui.exitPanelObj.SetActive(false);
+                break;
+            case KeyCode.Return:
+                if (ui.exitPanelObj.activeSelf)
+#if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+#elif UNITY_STANDALONE_WIN
+                    Application.Quit();
+#endif
                 break;
         }
     }

@@ -10,6 +10,7 @@ public class MusicSelectUI : MonoBehaviour
     public TextMeshProUGUI currentArtist;
     public TextMeshProUGUI currentBPM;
     public GameObject optionUIObj;
+    public GameObject exitPanelObj;
     public TextMeshProUGUI musicSoundValueText;
     public Slider musicSoundSlider;
     public TextMeshProUGUI userOffsetValueText;
@@ -23,12 +24,13 @@ public class MusicSelectUI : MonoBehaviour
 
     private void Awake()
     {
-        currentImage = transform.Find("MusicDetailPreview").Find("CurrentImage").GetComponent<Image>();
-        currentName = transform.Find("MusicDetailPreview").Find("CurrentName").GetComponent<TextMeshProUGUI>();
-        currentArtist = transform.Find("MusicDetailPreview").Find("CurrentArtist").GetComponent<TextMeshProUGUI>();
-        currentBPM = transform.Find("MusicDetailPreview").Find("CurrentBPM").GetComponent<TextMeshProUGUI>();
+        currentImage = transform.Find("MusicDetailPreview/CurrentImage").GetComponent<Image>();
+        currentName = transform.Find("MusicDetailPreview/CurrentName").GetComponent<TextMeshProUGUI>();
+        currentArtist = transform.Find("MusicDetailPreview/CurrentArtist").GetComponent<TextMeshProUGUI>();
+        currentBPM = transform.Find("MusicDetailPreview/CurrentBPM").GetComponent<TextMeshProUGUI>();
 
         optionUIObj = transform.Find("OptionPanel").gameObject;
+        exitPanelObj = transform.Find("ExitPanel").gameObject;
 
         musicSoundValueText = GameObject.Find("MusicSoundSetting").transform.Find("Value").GetComponent<TextMeshProUGUI>();
         musicSoundSlider = GameObject.Find("MusicSoundSetting").transform.Find("Slider").GetComponent<Slider>();
@@ -59,9 +61,10 @@ public class MusicSelectUI : MonoBehaviour
         slideSpeedValueText = GameObject.Find("SlideSpeedSetting").transform.Find("Value").GetComponent<TextMeshProUGUI>();
         slideSpeedSlider = GameObject.Find("SlideSpeedSetting").transform.Find("Slider").GetComponent<Slider>();
         slideSpeedSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("SlideSpeed"));
-        slideSpeedValueText.text = $"{slideSpeedSlider.value / 10}.{slideSpeedSlider.value % 10}";
+        slideSpeedValueText.text = $"{(int)slideSpeedSlider.value / 10}.{slideSpeedSlider.value % 10}";
 
-        optionUIObj.active = false;
+        optionUIObj.SetActive(false);
+        exitPanelObj.SetActive(false);
     }
 
     public void OnMusicSoundValueChange()
