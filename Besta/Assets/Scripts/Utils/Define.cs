@@ -66,4 +66,14 @@ public class Define
         Miss,
         None
     }
+
+    public enum ScreenResolution
+    {
+        _1920x1080,
+        _1600x900,
+        _1440x810,
+        _1366x768,
+        _1280x720,
+        _1024x576
+    }
 }

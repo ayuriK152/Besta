@@ -1,21 +1,56 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static Define;
 
 public class EditorOptionUI : MonoBehaviour
 {
     TextMeshProUGUI musicSoundValueText;
     Slider musicSoundSlider;
-    Button applyButton;
+    TMP_Dropdown screenResolutionDropdown;
+    Toggle fullScreenToggle;
+    string contentPath;
 
     private void Awake()
     {
-        musicSoundValueText = transform.Find("ScrollView/Viewport/Content/MusicSoundSetting/Value").GetComponent<TextMeshProUGUI>();
-        musicSoundSlider = transform.Find("ScrollView/Viewport/Content/MusicSoundSetting/Slider").GetComponent<Slider>();
+        contentPath = "ScrollView/Viewport/Content/";
+
+        musicSoundValueText = transform.Find($"{contentPath}MusicSoundSetting/Value").GetComponent<TextMeshProUGUI>();
+        musicSoundSlider = transform.Find($"{contentPath}MusicSoundSetting/Slider").GetComponent<Slider>();
+        screenResolutionDropdown = transform.Find($"{contentPath}ScreenSettings/ScreenResolutionSetting/Dropdown").GetComponent<TMP_Dropdown>();
+        fullScreenToggle = transform.Find($"{contentPath}ScreenSettings/FullScreenSetting/Toggle").GetComponent<Toggle>();
+
+        Init();
+    }
+
+    void Init()
+    {
         musicSoundSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("MusicSoundValue"));
         musicSoundValueText.text = $"{PlayerPrefs.GetInt("MusicSoundValue")}";
 
-        applyButton = transform.Find("ApplyButton").GetComponent<Button>();
+        switch (Screen.width)
+        {
+            case 1920:
+                screenResolutionDropdown.value = (int)ScreenResolution._1920x1080;
+                break;
+            case 1600:
+                screenResolutionDropdown.value = (int)ScreenResolution._1600x900;
+                break;
+            case 1440:
+                screenResolutionDropdown.value = (int)ScreenResolution._1440x810;
+                break;
+            case 1366:
+                screenResolutionDropdown.value = (int)ScreenResolution._1366x768;
+                break;
+            case 1280:
+                screenResolutionDropdown.value = (int)ScreenResolution._1280x720;
+                break;
+            case 1024:
+                screenResolutionDropdown.value = (int)ScreenResolution._1024x576;
+                break;
+        }
+
+        fullScreenToggle.isOn = Screen.fullScreen;
     }
 
     public void OnMusicSoundValueChange()
@@ -28,5 +63,35 @@ public class EditorOptionUI : MonoBehaviour
     public void OnClickApplyButton()
     {
         gameObject.SetActive(false);
+    }
+
+    public void OnChangeScreenResolution()
+    {
+        switch(screenResolutionDropdown.value)
+        {
+            case (int)ScreenResolution._1920x1080:
+                Screen.SetResolution(1920, 1080, fullScreenToggle.isOn);
+                break;
+            case (int)ScreenResolution._1600x900:
+                Screen.SetResolution(1600, 900, fullScreenToggle.isOn);
+                break;
+            case (int)ScreenResolution._1440x810:
+                Screen.SetResolution(1440, 810, fullScreenToggle.isOn);
+                break;
+            case (int)ScreenResolution._1366x768:
+                Screen.SetResolution(1366, 768, fullScreenToggle.isOn);
+                break;
+            case (int)ScreenResolution._1280x720:
+                Screen.SetResolution(1280, 720, fullScreenToggle.isOn);
+                break;
+            case (int)ScreenResolution._1024x576:
+                Screen.SetResolution(1024, 576, fullScreenToggle.isOn);
+                break;
+        }
+    }
+
+    public void OnToggleFullScreen()
+    {
+        Screen.fullScreen = fullScreenToggle.isOn;
     }
 }
