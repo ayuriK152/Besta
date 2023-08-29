@@ -22,6 +22,7 @@ public class EditorUI : MonoBehaviour
     TextMeshProUGUI maxComboText;
 
     GameObject editorOptionObj;
+    public GameObject exitPanelObj;
 
     void Start()
     {
@@ -48,7 +49,10 @@ public class EditorUI : MonoBehaviour
         #endregion
 
         editorOptionObj = GameObject.Find("EditorOption");
+        exitPanelObj = GameObject.Find("ExitPanel");
+
         editorOptionObj.SetActive(false);
+        exitPanelObj.SetActive(false);
 
         EditorController.PatternMaxComboUpdateAction -= OnMaxComboChange;
         EditorController.PatternMaxComboUpdateAction += OnMaxComboChange;

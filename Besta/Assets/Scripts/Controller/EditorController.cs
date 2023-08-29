@@ -122,6 +122,8 @@ public class EditorController : MonoBehaviour
         Managers.Input.MouseAction += EditorMouseEvent;
         Managers.Input.ScrollAction -= EditorMouseScrollEvent;
         Managers.Input.ScrollAction += EditorMouseScrollEvent;
+        Managers.Input.KeyDownAction -= PlayerKeyDown;
+        Managers.Input.KeyDownAction += PlayerKeyDown;
         PlayValueChangeAction -= OnPlayValueChanged;
         PlayValueChangeAction += OnPlayValueChanged;
         PatternSettingChangeAction -= OnSettingValueChanged;
@@ -645,5 +647,26 @@ public class EditorController : MonoBehaviour
                 break;
         }
         _noteTimingValue = _timingValuePerBar / beatDivideNum;
+    }
+
+    public void PlayerKeyDown(KeyCode key)
+    {
+        switch (key)
+        {
+            case KeyCode.Escape:
+                if (!uiScript.exitPanelObj.activeSelf)
+                    uiScript.exitPanelObj.SetActive(true);
+                else if (uiScript.exitPanelObj.activeSelf)
+                    uiScript.exitPanelObj.SetActive(false);
+                break;
+            case KeyCode.Return:
+                if (uiScript.exitPanelObj.activeSelf)
+#if UNITY_EDITOR
+                    EditorApplication.isPlaying = false;
+#elif UNITY_STANDALONE_WIN
+                    Application.Quit();
+#endif
+                break;
+        }
     }
 }
