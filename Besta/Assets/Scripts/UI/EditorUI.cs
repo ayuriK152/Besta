@@ -23,6 +23,7 @@ public class EditorUI : MonoBehaviour
 
     GameObject editorOptionObj;
     public GameObject exitPanelObj;
+    public GameObject loadCheckPanelObj;
 
     void Start()
     {
@@ -50,9 +51,11 @@ public class EditorUI : MonoBehaviour
 
         editorOptionObj = GameObject.Find("EditorOption");
         exitPanelObj = GameObject.Find("ExitPanel");
+        loadCheckPanelObj = GameObject.Find("LoadCheckPanel");
 
         editorOptionObj.SetActive(false);
         exitPanelObj.SetActive(false);
+        loadCheckPanelObj.SetActive(false);
 
         EditorController.PatternMaxComboUpdateAction -= OnMaxComboChange;
         EditorController.PatternMaxComboUpdateAction += OnMaxComboChange;
@@ -131,11 +134,26 @@ public class EditorUI : MonoBehaviour
 
     public void OnLoadButtonClick()
     {
+        if (EditorController.isModified)
+        {
+            loadCheckPanelObj.SetActive(true);
+        }
+        else
+            LoadPattern();
+    }
+
+    public void LoadPattern()
+    {
 #if UNITY_EDITOR
         EditorController.PatternLoadAction.Invoke(EditorUtility.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Resources/Patterns", "json"));
 #elif UNITY_STANDALONE_WIN
         EditorController.PatternLoadAction.Invoke(StandaloneFileBrowser.OpenFilePanel("Select pattern data file", $"{Application.dataPath}/Patterns", "json", false)[0]);
 #endif
+    }
+
+    public void OnIgnoreCancleClick()
+    {
+        loadCheckPanelObj.SetActive(false);
     }
 
     public void OnCreateButtonClick()

@@ -48,6 +48,7 @@ public class EditorController : MonoBehaviour
     public static Vector3 barLowerLimitPos;
     public static bool isPlayValueChanged;
     public static bool isGridScrolling;
+    public static bool isModified;
     int beatDivideNum;
 
     void Start()
@@ -91,6 +92,7 @@ public class EditorController : MonoBehaviour
 
     void Init()
     {
+        isModified = false;
         // 채보 판정 타이밍과 같은 수치 설정
         Managers.Sound.managerAudioSource.clip = _musicPattern.musicSource;
         Managers.Sound.managerAudioSource.timeSamples = 0;
@@ -112,6 +114,9 @@ public class EditorController : MonoBehaviour
         }
     }
 
+    /* 매니저의 액션같은 경우 null로 초기화를 시켜준 후 이벤트 등록을 하는편이 원래는 안정성이 더 높지만,
+     * 애초에 에디터는 다른 씬과의 이동이 없기 때문에 초기화하지 않아도 무방.
+     * 혹여나 씬간 이동이 추가될 경우 반드시 초기화 추가. */
     void ActionInit()
     {
         NoteCreateAction = null;
@@ -225,6 +230,7 @@ public class EditorController : MonoBehaviour
     {
         if (_currentNote != null)
         {
+            isModified = true;
             EditorNote currentNoteData = _currentNote.GetComponent<EditorNote>();
             if (editorNoteMode == EditorNoteMode.LongNote)
             {
@@ -487,6 +493,7 @@ public class EditorController : MonoBehaviour
 
     void SaveMusicPatternData()
     {
+        isModified = false;
         if (_musicPattern == null)
         {
             Debug.LogWarning("You tried to save pattern with out create or load any pattern!");
