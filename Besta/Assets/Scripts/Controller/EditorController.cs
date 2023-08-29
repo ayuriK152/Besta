@@ -454,12 +454,14 @@ public class EditorController : MonoBehaviour
         if (_musicPattern.artist != patternArtist)
         {
             _musicPattern.artist = patternArtist;
+            SaveMusicPatternData();
         }
 
         // 패턴 디자이너 변경시
         if (_musicPattern.designer != patternDesigner)
         {
             _musicPattern.designer = patternDesigner;
+            SaveMusicPatternData();
         }
     }
 
@@ -505,10 +507,6 @@ public class EditorController : MonoBehaviour
 
     void CreateMusicPattern()
     {
-        if (_musicPattern != null )
-        {
-            // 이미 작업중이던 채보가 존재하는 경우 해당 채보를 저장할 것인지 물어본 후 저장 여부를 결정하는 기능 추가 요망
-        }
 #if UNITY_EDITOR
         string musicFilePath = EditorUtility.OpenFilePanel("Choose music file", "", "mp3");
 #elif UNITY_STANDALONE_WIN

@@ -543,7 +543,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2059275274}
         m_TargetAssemblyTypeName: EditorUI, Assembly-CSharp
-        m_MethodName: OnTitleUpdate
+        m_MethodName: OnDesignerUpdate
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6122,11 +6122,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "*\uACE1\uBA85\uC744 \uBCC0\uACBD\uD558\uBA74 \uC989\uC2DC \uD328\uD134\uC758
-    \uBCC0\uACBD\uC0AC\uD56D\uC774 \uC800\uC7A5\uB429\uB2C8\uB2E4"
+  m_text: "*\uC544\uB798 3\uAC1C\uC758 \uC635\uC158\uB4E4\uC744 \uBCC0\uACBD\uD558\uBA74
+    \uC989\uC2DC \uD328\uD134\uC758 \uBCC0\uACBD\uC0AC\uD56D\uC774 \uC800\uC7A5\uB429\uB2C8\uB2E4"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 62a08706c292d0f4db72727d7f51aba0, type: 2}
-  m_sharedMaterial: {fileID: 2895280916400183213, guid: 62a08706c292d0f4db72727d7f51aba0, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 0aa74b536e1e770439e1a18c92b63a9f, type: 2}
+  m_sharedMaterial: {fileID: 7209116390941281484, guid: 0aa74b536e1e770439e1a18c92b63a9f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -7182,7 +7182,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2059275274}
         m_TargetAssemblyTypeName: EditorUI, Assembly-CSharp
-        m_MethodName: OnTitleUpdate
+        m_MethodName: OnArtistUpdate
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
