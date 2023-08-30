@@ -471,6 +471,7 @@ GameObject:
   - component: {fileID: 177330152}
   - component: {fileID: 177330154}
   - component: {fileID: 177330153}
+  - component: {fileID: 177330155}
   m_Layer: 5
   m_Name: JudgeText
   m_TagString: Untagged
@@ -518,7 +519,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: Judge
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: def1d2ae743859649a4bb2ea5a3c887d, type: 2}
   m_sharedMaterial: {fileID: -1979173528780748979, guid: def1d2ae743859649a4bb2ea5a3c887d, type: 2}
@@ -595,6 +596,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 177330151}
   m_CullTransparentMesh: 1
+--- !u!95 &177330155
+Animator:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 177330151}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: c61e62d5dc9f23d44ac3e4186b8f9cc3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &214580780
 GameObject:
   m_ObjectHideFlags: 0

@@ -21,6 +21,7 @@ public class IngameUI : MonoBehaviour
     Coroutine timingDiffTextCoroutine;
 
     Animator comboTextAnimator;
+    Animator judgeTextAnimator;
     public Animator introMusicInfoAnimator;
 
     void Start()
@@ -41,6 +42,7 @@ public class IngameUI : MonoBehaviour
         etcText.text = $"BPM - {Managers.Game.currentLoadedPattern.bpm} | Design - ayuriK";
 
         comboTextAnimator = GameObject.Find("ComboText").GetComponent<Animator>();
+        judgeTextAnimator = GameObject.Find("JudgeText").GetComponent<Animator>();
         introMusicInfoAnimator = GameObject.Find("IngameMusicInfo").GetComponent<Animator>();
         fadePanelImage = GameObject.Find("FadePanel").GetComponent<Image>();
 
@@ -140,8 +142,8 @@ public class IngameUI : MonoBehaviour
 
     IEnumerator FadeJudgeText()
     {
-        yield return new WaitForSeconds(0.4f);
-        judgeText.color = new Color(0, 0, 0, 0);
+        judgeTextAnimator.Play("JudgeUpdateAnimation", -1, 0);
+        yield return null;
     }
 
     IEnumerator FadeTimingText()
