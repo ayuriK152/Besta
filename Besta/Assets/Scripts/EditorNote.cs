@@ -36,6 +36,7 @@ public class EditorNote : MonoBehaviour
             isTriggered = false;
         if (!isTriggered && Managers.Sound.managerAudioSource.timeSamples + EditorController.patternOffset >= noteData.startTiming)
         {
+            hitSound.volume = EditorController.effectSoundValue;
             hitSound.Play();
             isTriggered = true;
         }

@@ -7,6 +7,8 @@ public class EditorOptionUI : MonoBehaviour
 {
     TextMeshProUGUI musicSoundValueText;
     Slider musicSoundSlider;
+    TextMeshProUGUI effectSoundValueText;
+    Slider effectSoundSlider;
     TMP_Dropdown screenResolutionDropdown;
     Toggle fullScreenToggle;
     string contentPath;
@@ -17,6 +19,8 @@ public class EditorOptionUI : MonoBehaviour
 
         musicSoundValueText = transform.Find($"{contentPath}MusicSoundSetting/Value").GetComponent<TextMeshProUGUI>();
         musicSoundSlider = transform.Find($"{contentPath}MusicSoundSetting/Slider").GetComponent<Slider>();
+        effectSoundValueText = transform.Find($"{contentPath}EffectSoundSetting/Value").GetComponent<TextMeshProUGUI>();
+        effectSoundSlider = transform.Find($"{contentPath}EffectSoundSetting/Slider").GetComponent<Slider>();
         screenResolutionDropdown = transform.Find($"{contentPath}ScreenSettings/ScreenResolutionSetting/Dropdown").GetComponent<TMP_Dropdown>();
         fullScreenToggle = transform.Find($"{contentPath}ScreenSettings/FullScreenSetting/Toggle").GetComponent<Toggle>();
 
@@ -27,6 +31,9 @@ public class EditorOptionUI : MonoBehaviour
     {
         musicSoundSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("MusicSoundValue"));
         musicSoundValueText.text = $"{PlayerPrefs.GetInt("MusicSoundValue")}";
+        effectSoundSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("EffectSoundValue"));
+        effectSoundValueText.text = $"{PlayerPrefs.GetInt("EffectSoundValue")}";
+        EditorController.effectSoundValue = PlayerPrefs.GetInt("EffectSoundValue") / 100.0f;
 
         switch (Screen.width)
         {
@@ -58,6 +65,13 @@ public class EditorOptionUI : MonoBehaviour
         PlayerPrefs.SetInt("MusicSoundValue", (int)musicSoundSlider.value);
         musicSoundValueText.text = PlayerPrefs.GetInt("MusicSoundValue").ToString();
         Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetInt("MusicSoundValue") / 100.0f;
+    }
+
+    public void OnEffectSoundValueChange()
+    {
+        PlayerPrefs.SetInt("EffectSoundValue", (int)effectSoundSlider.value);
+        effectSoundValueText.text = PlayerPrefs.GetInt("EffectSoundValue").ToString();
+        EditorController.effectSoundValue = PlayerPrefs.GetInt("EffectSoundValue") / 100.0f;
     }
 
     public void OnClickApplyButton()

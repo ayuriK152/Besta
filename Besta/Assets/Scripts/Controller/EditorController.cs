@@ -22,6 +22,7 @@ public class EditorController : MonoBehaviour
     public static EditorNoteMode editorNoteMode;
     public static Beat editorBeat;
     public static float currentPlayValue;       // 노래 파일의 샘플 레이트 기준 재생 시간 측정용
+    public static float effectSoundValue = 0;
     public static int baseBPM;
     public static int patternOffset;
     public static int totalCombo = 0;
