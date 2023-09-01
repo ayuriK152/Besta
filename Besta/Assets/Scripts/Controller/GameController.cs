@@ -12,6 +12,7 @@ public class GameController : MonoBehaviour
     GameObject judgeLineObject;
     Transform[] laneTransforms = new Transform[4];
     SpriteRenderer[] lanePressEffects = new SpriteRenderer[4];
+    AudioSource[] lanePressSounds = new AudioSource[4];
 
     float _barSampleAmount;
     float[] holdingSampleAmout = new float[4];
@@ -44,6 +45,15 @@ public class GameController : MonoBehaviour
         lanePressEffects[1] = GameObject.Find("SecondLanePressEffect").GetComponent<SpriteRenderer>();
         lanePressEffects[2] = GameObject.Find("ThirdLanePressEffect").GetComponent<SpriteRenderer>();
         lanePressEffects[3] = GameObject.Find("FourthLanePressEffect").GetComponent<SpriteRenderer>();
+        lanePressSounds[0] = GameObject.Find("FirstLanePressEffect").GetComponent<AudioSource>();
+        lanePressSounds[1] = GameObject.Find("SecondLanePressEffect").GetComponent<AudioSource>();
+        lanePressSounds[2] = GameObject.Find("ThirdLanePressEffect").GetComponent<AudioSource>();
+        lanePressSounds[3] = GameObject.Find("FourthLanePressEffect").GetComponent<AudioSource>();
+        lanePressSounds[0].volume = PlayerPrefs.GetInt("EffectSoundValue") / 100.0f;
+        lanePressSounds[1].volume = PlayerPrefs.GetInt("EffectSoundValue") / 100.0f;
+        lanePressSounds[2].volume = PlayerPrefs.GetInt("EffectSoundValue") / 100.0f;
+        lanePressSounds[3].volume = PlayerPrefs.GetInt("EffectSoundValue") / 100.0f;
+
         for (int i = 0; i < 4; i++)
         {
             laneNotes[i] = new Queue<GameObject>();
@@ -156,6 +166,7 @@ public class GameController : MonoBehaviour
 
     IEnumerator NoteProcessKeyDown(int lane, double timing)
     {
+        lanePressSounds[lane].Play();
         holdingCheck[lane] = true;
         lanePressEffects[lane].enabled = true;
         if (laneNoteDatas[lane].Count == 0)

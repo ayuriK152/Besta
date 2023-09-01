@@ -13,6 +13,8 @@ public class MusicSelectUI : MonoBehaviour
     public GameObject exitPanelObj;
     public TextMeshProUGUI musicSoundValueText;
     public Slider musicSoundSlider;
+    public TextMeshProUGUI effectSoundValueText;
+    public Slider effectSoundSlider;
     public TextMeshProUGUI userOffsetValueText;
     public Slider userOffsetSlider;
     public TextMeshProUGUI judgeLineHeightValueText;
@@ -36,6 +38,11 @@ public class MusicSelectUI : MonoBehaviour
         musicSoundSlider = GameObject.Find("MusicSoundSetting").transform.Find("Slider").GetComponent<Slider>();
         musicSoundSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("MusicSoundValue"));
         musicSoundValueText.text = $"{PlayerPrefs.GetInt("MusicSoundValue")}";
+
+        effectSoundValueText = GameObject.Find("EffectSoundSetting").transform.Find("Value").GetComponent<TextMeshProUGUI>();
+        effectSoundSlider = GameObject.Find("EffectSoundSetting").transform.Find("Slider").GetComponent<Slider>();
+        effectSoundSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("EffectSoundValue"));
+        effectSoundValueText.text = $"{PlayerPrefs.GetInt("EffectSoundValue")}";
 
         userOffsetValueText = GameObject.Find("UserOffsetSetting").transform.Find("Value").GetComponent<TextMeshProUGUI>();
         userOffsetSlider = GameObject.Find("UserOffsetSetting").transform.Find("Slider").GetComponent<Slider>();
@@ -72,6 +79,12 @@ public class MusicSelectUI : MonoBehaviour
         PlayerPrefs.SetInt("MusicSoundValue", (int)musicSoundSlider.value);
         musicSoundValueText.text = PlayerPrefs.GetInt("MusicSoundValue").ToString();
         Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetInt("MusicSoundValue") / 100.0f;
+    }
+
+    public void OnEffectSoundValueChange()
+    {
+        PlayerPrefs.SetInt("EffectSoundValue", (int)effectSoundSlider.value);
+        effectSoundValueText.text = PlayerPrefs.GetInt("EffectSoundValue").ToString();
     }
 
     public void OnUserOffsetValueChange()

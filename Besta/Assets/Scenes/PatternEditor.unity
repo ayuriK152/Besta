@@ -12117,7 +12117,7 @@ GameObject:
   - component: {fileID: 1771676866}
   - component: {fileID: 1771676867}
   m_Layer: 0
-  m_Name: whiteLine
+  m_Name: JudgeLine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

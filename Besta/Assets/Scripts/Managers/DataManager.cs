@@ -148,7 +148,7 @@ public class DataManager
         Managers.Sound.managerAudioSource.volume = PlayerPrefs.GetInt("MusicSoundValue") / 100.0f;
 
         if (!PlayerPrefs.HasKey("EffectSoundValue"))
-            PlayerPrefs.SetFloat("EffectSoundValue", 0.5f);
+            PlayerPrefs.SetInt("EffectSoundValue", 50);
 
         if (!PlayerPrefs.HasKey("LastSelectMusic"))
             PlayerPrefs.SetInt("LastSelectMusic", 0);
