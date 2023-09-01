@@ -32,18 +32,18 @@ public class IngameUI : MonoBehaviour
         scoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
         scoreText.text = "0";
         maxcomboText = GameObject.Find("MaxComboText").GetComponent<TextMeshProUGUI>();
-        jacketImage = GameObject.Find("IngameMusicInfo").transform.Find("Image").GetComponent<Image>();
+        jacketImage = GameObject.Find("IngameMusicIntro").transform.Find("Image").GetComponent<Image>();
         jacketImage.sprite = Resources.Load<Sprite>($"Patterns/{Managers.Game.currentLoadedPattern.name}/image");
-        musicNameText = GameObject.Find("IngameMusicInfo").transform.Find("Panel").Find("MusicName").GetComponent<TextMeshProUGUI>();
+        musicNameText = GameObject.Find("IngameMusicIntro").transform.Find("Panel").Find("MusicName").GetComponent<TextMeshProUGUI>();
         musicNameText.text = Managers.Game.currentLoadedPattern.name;
-        artistNameText = GameObject.Find("IngameMusicInfo").transform.Find("Panel").Find("ArtistName").GetComponent<TextMeshProUGUI>();
+        artistNameText = GameObject.Find("IngameMusicIntro").transform.Find("Panel").Find("ArtistName").GetComponent<TextMeshProUGUI>();
         artistNameText.text = Managers.Game.currentLoadedPattern.artist;
-        etcText = GameObject.Find("IngameMusicInfo").transform.Find("Panel").Find("Etc").GetComponent<TextMeshProUGUI>();
+        etcText = GameObject.Find("IngameMusicIntro").transform.Find("Panel").Find("Etc").GetComponent<TextMeshProUGUI>();
         etcText.text = $"BPM - {Managers.Game.currentLoadedPattern.bpm} | Design - ayuriK";
 
         comboTextAnimator = GameObject.Find("ComboText").GetComponent<Animator>();
         judgeTextAnimator = GameObject.Find("JudgeText").GetComponent<Animator>();
-        introMusicInfoAnimator = GameObject.Find("IngameMusicInfo").GetComponent<Animator>();
+        introMusicInfoAnimator = GameObject.Find("IngameMusicIntro").GetComponent<Animator>();
         fadePanelImage = GameObject.Find("FadePanel").GetComponent<Image>();
 
         GameController.JudgeAction = null;
@@ -57,7 +57,7 @@ public class IngameUI : MonoBehaviour
 
     IEnumerator IngameIntro()
     {
-        introMusicInfoAnimator.Play("IngameMusicInfoAnimation");
+        introMusicInfoAnimator.Play("IngameMusicIntroAnimation");
         while (introMusicInfoAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1) { yield return null; }
         GameController.isPlaying = true;
         yield return null;
