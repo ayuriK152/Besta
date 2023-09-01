@@ -14,6 +14,7 @@ public class MusicPanel : MonoBehaviour
     Image albumArt;
 
     MusicSelectUI ui;
+    MusicSelectOptionUI uiOption;
 
     private void Awake()
     {
@@ -22,6 +23,11 @@ public class MusicPanel : MonoBehaviour
         albumArt = transform.Find("Image").GetComponent<Image>();
         ui = Managers.UI.currentSceneUI as MusicSelectUI;
         Managers.Sound.managerAudioSource.loop = true;
+    }
+
+    void Start()
+    {
+        uiOption = ui.optionUIObj.GetComponent<MusicSelectOptionUI>();
     }
 
     public void OnClickSelectButton()
