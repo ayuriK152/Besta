@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static Define;
 
 public class MusicSelectUI : MonoBehaviour
 {
@@ -23,6 +24,8 @@ public class MusicSelectUI : MonoBehaviour
     public Slider notePositionSlider;
     public TextMeshProUGUI slideSpeedValueText;
     public Slider slideSpeedSlider;
+    TMP_Dropdown screenResolutionDropdown;
+    TMP_Dropdown fullScreenDropdown;
 
     private void Awake()
     {
@@ -70,6 +73,9 @@ public class MusicSelectUI : MonoBehaviour
         slideSpeedSlider.SetValueWithoutNotify(PlayerPrefs.GetInt("SlideSpeed"));
         slideSpeedValueText.text = $"{(int)slideSpeedSlider.value / 10}.{slideSpeedSlider.value % 10}";
 
+        screenResolutionDropdown = GameObject.Find("ScreenResolutionSetting").transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
+        fullScreenDropdown = GameObject.Find("FullScreenSetting").transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
+
         optionUIObj.SetActive(false);
         exitPanelObj.SetActive(false);
     }
@@ -115,5 +121,46 @@ public class MusicSelectUI : MonoBehaviour
     {
         PlayerPrefs.SetInt("SlideSpeed", (int)slideSpeedSlider.value);
         slideSpeedValueText.text = $"{(int)slideSpeedSlider.value / 10}.{slideSpeedSlider.value % 10}";
+    }
+
+    public void OnChangeScreenResolution()
+    {
+        switch (screenResolutionDropdown.value)
+        {
+            case (int)ScreenResolution._1920x1080:
+                Screen.SetResolution(1920, 1080, Screen.fullScreenMode);
+                break;
+            case (int)ScreenResolution._1600x900:
+                Screen.SetResolution(1600, 900, Screen.fullScreenMode);
+                break;
+            case (int)ScreenResolution._1440x810:
+                Screen.SetResolution(1440, 810, Screen.fullScreenMode);
+                break;
+            case (int)ScreenResolution._1366x768:
+                Screen.SetResolution(1366, 768, Screen.fullScreenMode);
+                break;
+            case (int)ScreenResolution._1280x720:
+                Screen.SetResolution(1280, 720, Screen.fullScreenMode);
+                break;
+            case (int)ScreenResolution._1024x576:
+                Screen.SetResolution(1024, 576, Screen.fullScreenMode);
+                break;
+        }
+    }
+
+    public void OnChangeFullScreenMode()
+    {
+        switch (fullScreenDropdown.value)
+        {
+            case (int)Define.FullScreenMode.Fullscreen:
+                Screen.fullScreenMode = UnityEngine.FullScreenMode.FullScreenWindow;
+                break;
+            case (int)Define.FullScreenMode.Exclusive:
+                Screen.fullScreenMode = UnityEngine.FullScreenMode.ExclusiveFullScreen;
+                break;
+            case (int)Define.FullScreenMode.Windowed:
+                Screen.fullScreenMode = UnityEngine.FullScreenMode.Windowed;
+                break;
+        }
     }
 }

@@ -76,4 +76,11 @@ public class Define
         _1280x720,
         _1024x576
     }
+
+    public enum FullScreenMode
+    {
+        Fullscreen,
+        Exclusive,
+        Windowed
+    }
 }
