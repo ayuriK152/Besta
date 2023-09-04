@@ -89,6 +89,7 @@ public class MusicSelectOptionUI : MonoBehaviour
                 screenResolutionDropdown.value = (int)ScreenResolution._1024x576;
                 break;
         }
+
         switch (Screen.fullScreenMode)
         {
             case UnityEngine.FullScreenMode.FullScreenWindow:
