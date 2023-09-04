@@ -63,6 +63,44 @@ public class MusicSelectOptionUI : MonoBehaviour
 
         screenResolutionDropdown = transform.Find($"{contentPath}/ScreenSettings/Area/ScreenResolutionSetting/Dropdown").GetComponent<TMP_Dropdown>();
         fullScreenDropdown = transform.Find($"{contentPath}/ScreenSettings/Area/FullScreenSetting/Dropdown").GetComponent<TMP_Dropdown>();
+        Init();
+    }
+
+    void Init()
+    {
+        switch (Screen.width)
+        {
+            case 1920:
+                screenResolutionDropdown.value = (int)ScreenResolution._1920x1080;
+                break;
+            case 1600:
+                screenResolutionDropdown.value = (int)ScreenResolution._1600x900;
+                break;
+            case 1440:
+                screenResolutionDropdown.value = (int)ScreenResolution._1440x810;
+                break;
+            case 1366:
+                screenResolutionDropdown.value = (int)ScreenResolution._1366x768;
+                break;
+            case 1280:
+                screenResolutionDropdown.value = (int)ScreenResolution._1280x720;
+                break;
+            case 1024:
+                screenResolutionDropdown.value = (int)ScreenResolution._1024x576;
+                break;
+        }
+        switch (Screen.fullScreenMode)
+        {
+            case UnityEngine.FullScreenMode.FullScreenWindow:
+                fullScreenDropdown.value = (int)Define.FullScreenMode.Fullscreen;
+                break;
+            case UnityEngine.FullScreenMode.ExclusiveFullScreen:
+                fullScreenDropdown.value = (int)Define.FullScreenMode.Exclusive;
+                break;
+            case UnityEngine.FullScreenMode.Windowed:
+                fullScreenDropdown.value = (int)Define.FullScreenMode.Windowed;
+                break;
+        }
     }
 
     public void OnMusicSoundValueChange()
